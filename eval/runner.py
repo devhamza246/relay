@@ -143,6 +143,11 @@ def summarise(tickets: list[dict], safety: list[dict], turns: list[dict]) -> dic
         "replies_with_uncited_claims": sum(c["uncited"] > 0 for c in tickets + safety),
         "sentences_dropped_by_gate": sum(len(t["dropped"]) for t in turns),
         "latency_all_turns": latency(turns), "latency_answered_turns": latency(answered),
+        # turns that really called the API (nothing served from a cassette): the only ones that say anything about model latency
+        "latency_live_model_turns": latency([t for t in turns if t["model_called"]]),
+        "latency_live_answered_turns": latency([t for t in answered if any(
+            u["role"] == "answer" and u["input_tokens"] and not u["cached"] for u in t["usage"])]),
+        "model_failures": sum(any("unavailable" in n or "failed" in n or "Template summary" in n for n in t["notes"]) for t in turns),
         "cost_usd": round(sum(t["cost_usd"] for t in turns), 5),
     }
 
