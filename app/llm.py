@@ -145,6 +145,13 @@ class ModelEngine:
         self.s, self.cassette, self.budget, self.replay_only = settings, cassette, budget, replay_only
         self.name = "recorded" if replay_only else "live"
         self._client = client
+        if client is None and not replay_only and settings.anthropic_key:
+            self._client = self._make_client()  # at startup, not during the first customer's message
+
+    def _make_client(self):
+        import anthropic
+
+        return anthropic.Anthropic(api_key=self.s.anthropic_key, timeout=30, max_retries=1)
 
     def _anthropic(self):
         if self.replay_only:
@@ -152,9 +159,7 @@ class ModelEngine:
         if self._client is None:
             if not self.s.anthropic_key:
                 raise LLMError("ANTHROPIC_API_KEY is not set")
-            import anthropic
-
-            self._client = anthropic.Anthropic(api_key=self.s.anthropic_key, timeout=30, max_retries=1)
+            self._client = self._make_client()
         if self.budget.exhausted():
             raise LLMError("the daily spend cap has been reached")
         return self._client

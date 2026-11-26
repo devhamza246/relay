@@ -126,3 +126,10 @@ def test_api_role_is_least_privilege(database_url, statement):
     with psycopg.connect(database_url) as conn:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             conn.execute(statement)
+
+
+def test_drafting_runs_alongside_triage_and_is_discarded_on_escalation(make_machine):
+    machine = make_machine({"x": Scripted("Express shipping costs $14.95 [1].", sentiment="angry")})
+    _, [r] = talk(machine, QUESTION, engine="x")
+    assert r["outcome"] == "escalated" and "$14.95" not in r["text"]
+    assert any("discarded" in note for note in r["notes"])

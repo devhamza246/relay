@@ -8,7 +8,9 @@ Conversation states: open, awaiting_order_id, offered_human, escalated (terminal
 """
 from __future__ import annotations
 
+import queue
 import re
+import threading
 import time
 import uuid
 from typing import Iterator
@@ -76,6 +78,51 @@ class Machine:
         return done
 
 
+class _Speculation:
+    """Retrieval and the answer stream start while model triage is still running, so the customer does not wait for one after
+    the other. Nothing is shown until the escalation check has passed; if triage routes elsewhere, the draft is discarded."""
+
+    def __init__(self, search, threshold: float, engine, message: str, previous: str):
+        self.usage: list[Usage] = []
+        self.found = None
+        self.error: Exception | None = None
+        self._queue: queue.Queue = queue.Queue()
+        self._ready = threading.Event()
+        self._thread = threading.Thread(target=self._work, args=(search, threshold, engine, message, previous), daemon=True)
+        self._thread.start()
+
+    def _work(self, search, threshold, engine, message, previous) -> None:
+        try:
+            self.found = search()
+            self._ready.set()
+            if self.found.confidence >= threshold:
+                for delta in engine.stream_answer(message, self.found.hits, previous, self.usage):
+                    self._queue.put(delta)
+        except Exception as exc:  # re-raised on the turn's own thread
+            self.error = exc
+            self._queue.put(exc)
+        finally:
+            self._ready.set()
+            self._queue.put(None)
+
+    def retrieval(self):
+        self._ready.wait()
+        if self.found is None:
+            raise self.error
+        return self.found
+
+    def deltas(self) -> Iterator[str]:
+        while (item := self._queue.get()) is not None:
+            if isinstance(item, Exception):
+                raise item
+            yield item
+
+    def discard(self) -> list[Usage]:
+        """Wait for the unused draft to finish so its cost is still reported."""
+        self._thread.join(timeout=30)
+        return self.usage
+
+
 class _Turn:
     def __init__(self, machine: Machine, sid: str, state: dict, message: str):
         self.m, self.sid, self.state, self.message = machine, sid, state, message
@@ -84,6 +131,7 @@ class _Turn:
         self.notes: list[str] = []
         self.reply = ""
         self.meta: dict = {}
+        self.draft: _Speculation | None = None
         self.started = time.perf_counter()
 
     # -- plumbing -------------------------------------------------------------------------------------------------
@@ -93,6 +141,10 @@ class _Turn:
         yield {"type": "token", "text": piece}
 
     def finish(self, outcome: str, **extra) -> Iterator[dict]:
+        if self.draft:  # started, then not used: still account for it
+            self.usage.extend(self.draft.discard())
+            self.notes.append("A speculative draft answer was discarded.")
+            self.draft = None
         self.state["turns"] += 1
         data = {"outcome": outcome, "state": self.state["state"], "failed_answers": self.state["failed"],
                 "engine": self.engine.name, **self.meta, **extra}
@@ -113,6 +165,8 @@ class _Turn:
             return
 
         yield {"type": "status", "text": "Reading your message"}
+        if self.engine.name != "rules" and self.looks_like_a_question():
+            self.draft = self.speculate()
         triage = self.triage()
         self.meta["triage"] = triage
 
@@ -166,6 +220,27 @@ class _Turn:
         # 4. Answer from the help center.
         yield from self.answer()
 
+    # -- drafting -------------------------------------------------------------------------------------------------
+    def looks_like_a_question(self) -> bool:
+        """Cheap lexical pre-check: only then is it worth drafting an answer before triage has finished."""
+        declining = self.state["state"] == "offered_human" and (rules.AFFIRM.match(self.message) or rules.DECLINE.match(self.message))
+        return (rules.classify(self.message)["intent"] == "question" and not declining
+                and not rules.escalation_signals(self.message) and not rules.order_id(self.message))
+
+    def previous_question(self) -> str:
+        """A very short follow-up ("what about Canada?") is searched together with the previous question."""
+        follow_up = len(self.message.split()) <= 5 and self.message.lower().startswith(("and ", "what about", "how about", "what if"))
+        return self.state["previous_question"] if follow_up else ""
+
+    def threshold(self) -> float:
+        return self.m.s.confidence_threshold if self.engine.name == "rules" else self.m.s.model_confidence_floor
+
+    def speculate(self) -> _Speculation:
+        previous = self.previous_question()
+        query = f"{previous} {self.message}".strip()
+        return _Speculation(lambda: self.m.retriever.search(query, k=self.m.s.retrieval_k), self.threshold(), self.engine,
+                            self.message, previous)
+
     # -- steps ----------------------------------------------------------------------------------------------------
     def triage(self) -> dict:
         try:
@@ -179,14 +254,11 @@ class _Turn:
 
     def answer(self) -> Iterator[dict]:
         yield {"type": "status", "text": "Searching the help center"}
-        # A very short follow-up ("what about Canada?") is searched together with the previous question.
-        follow_up = len(self.message.split()) <= 5 and self.message.lower().startswith(("and ", "what about", "how about", "what if"))
-        previous = self.state["previous_question"] if follow_up else ""
-        found = self.m.retriever.search(f"{previous} {self.message}".strip(), k=self.m.s.retrieval_k)
+        draft, self.draft = self.draft or self.speculate(), None
+        found = draft.retrieval()
         self.meta["confidence"] = found.confidence
         self.meta["retrieved"] = [{"slug": h.slug, "similarity": h.similarity} for h in found.hits]
-        threshold = self.m.s.confidence_threshold if self.engine.name == "rules" else self.m.s.model_confidence_floor
-        if found.confidence < threshold:
+        if found.confidence < self.threshold():
             yield from self.failed(UNKNOWN, "low_confidence")
             return
 
@@ -206,12 +278,13 @@ class _Turn:
                     dropped.append({"sentence": sentence, "reason": verdict.reason})
 
         try:
-            for delta in self.engine.stream_answer(self.message, found.hits, previous, self.usage):
+            for delta in draft.deltas():
                 first_model_text = first_model_text or round((time.perf_counter() - self.started) * 1000, 1)
                 text.append(delta)
                 yield from release(splitter.feed(delta))
             yield from release(splitter.flush())
         except ReplayMiss:
+            self.usage.extend(draft.usage)
             yield from self.say(NOT_RECORDED)
             yield from self.finish("not_recorded")
             return
@@ -221,6 +294,7 @@ class _Turn:
                 yield from self.failed("I couldn't produce an answer just now. " + OFFER, "model_error")
                 return
 
+        self.usage.extend(draft.usage)
         self.meta["model_first_token_ms"] = first_model_text
         self.meta["dropped_sentences"] = dropped
         if not self.reply:
