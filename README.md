@@ -4,7 +4,7 @@
 
 **Resolves the easy tickets with cited answers and escalates the rest with full context.**
 
-**Live demo:** https://relay.hamzacodes.dev · **Results on Gauge:** https://gauge.hamzacodes.dev (suites `relay-support-live` and `relay-support-rules`)
+**Live demo:** https://relay.hamzacodes.dev · **Results on Gauge:** https://gauge.hamzacodes.dev (suites `relay-support-live`, `relay-support-holdout` and `relay-support-rules`)
 
 A chat widget answers from a help center and cites its sources. A billing dispute, legal threat, angry customer, security or
 safety report, request for a person, or two failed answers hands the conversation to a human: a ticket is opened and a Slack
