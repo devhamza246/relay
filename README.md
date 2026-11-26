@@ -178,7 +178,10 @@ this server and its Cloudflare tunnel, so use a separate key with a low spend li
 fake client against the database, session state, logs and cassette, and once on the deployment with a real key and the cap
 at zero: the key was not found in Postgres, Redis, container logs or the cassette.
 
-The page opens with a short "What is this?" guide covering how to trigger and inspect a handoff.
+The page opens with a short "What is this?" guide, and a nine-step **guided tour** highlights each feature on a first visit
+("Take the tour" replays it; it works from the keyboard, on phones and with reduced motion). Every wait shows a loader,
+replies show a typing indicator, a notice appears after 5 seconds, and failures offer a retry. These are covered by browser
+tests ([`tests/test_ui.py`](tests/test_ui.py)) against a stub API; accessibility beyond that has not been audited.
 
 The compose default is `replay`, which needs no key and cannot spend. Replaying the cassette reproduces the benchmark
 run's scores exactly, and CI gates on this. The demo shows the retention period, uses fictional identities and asks
