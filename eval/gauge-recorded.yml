@@ -1,0 +1,20 @@
+# Same gate over the recorded real-model answers (eval/cassette.jsonl). Run with RELAY_EVAL_ENGINE=recorded RELAY_LLM_MODE=replay.
+name: relay-support-recorded
+dataset: dataset.jsonl
+app: eval.gauge_app:run
+concurrency: 1
+scorers:
+  - type: python
+    name: correct
+    path: eval.scorers:correct
+  - type: python
+    name: cited
+    path: eval.scorers:cited
+  - type: python
+    name: escalation
+    path: eval.scorers:escalation
+thresholds:
+  max_pass_rate_drop: 0.0
+  max_new_failures: 0
+  max_cost_increase: 1.0
+  max_latency_increase: 20.0   # CI runners are noisy and the rule-based engine answers in milliseconds

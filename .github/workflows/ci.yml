@@ -73,3 +73,13 @@ jobs:
           config: eval/gauge.yml
           baseline: eval/gauge-baseline.json
           extra-requirements: "-e ."
+      # The recorded real-model answers replayed through the same cases: no key, no spending.
+      - uses: devhamza246/gauge@main
+        env:
+          RELAY_EVAL_ENGINE: recorded
+          RELAY_LLM_MODE: replay
+          RELAY_CASSETTE: ${{ github.workspace }}/eval/cassette.jsonl
+        with:
+          config: eval/gauge-recorded.yml
+          baseline: eval/gauge-recorded-baseline.json
+          extra-requirements: "-e ."
