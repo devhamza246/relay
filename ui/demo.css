@@ -1,0 +1,31 @@
+:root{--bg:#f3f5f4;--card:#fff;--ink:#17211d;--muted:#5d6b65;--line:#dbe3df;--brand:#1f5c4a}
+@media (prefers-color-scheme:dark){:root{--bg:#101513;--card:#19211e;--ink:#e6ede9;--muted:#9aaba3;--line:#2c3833;--brand:#58b294}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.top,main,footer{max-width:1100px;margin:0 auto;padding:0 20px}
+.top{padding-top:28px}
+h1{margin:0;color:var(--brand);font-size:32px}
+h2{margin:0 0 12px;font-size:17px}
+.notice{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--muted)}
+main{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;padding-bottom:40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.wide{grid-column:1/-1}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{font:inherit;font-size:14px;border:1px solid var(--brand);color:var(--brand);background:transparent;border-radius:999px;padding:6px 14px;cursor:pointer}
+.chips button:hover{background:var(--brand);color:var(--card)}
+.muted{color:var(--muted);font-size:13px}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0;font-size:13px;color:var(--ink)}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+.slack{border:1px solid var(--line);border-left:4px solid #e0a100;border-radius:8px;padding:12px 16px;color:var(--ink);font-size:14px;max-width:760px;white-space:pre-wrap;overflow-wrap:anywhere}
+.slack h3{margin:0 0 8px;font-size:15px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slack hr{border:0;border-top:1px solid var(--line)}
+.badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;background:#fdf0d5;color:#7a5200;margin-bottom:10px}
+.badge.sent{background:#dcf1e7;color:#14503d}
+pre{overflow:auto;max-height:320px;background:var(--bg);border-radius:8px;padding:10px;font-size:12px}
+footer{padding-bottom:110px;font-size:13px;color:var(--muted)}
+a{color:var(--brand)}
+@media (max-width:760px){main{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}

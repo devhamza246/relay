@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: testadmin
+        ports: ["55434:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -h 127.0.0.1"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .fastembed
+          key: fastembed-bge-small-en-v1.5
+      - run: pip install -e ".[dev]" "git+https://github.com/devhamza246/gauge.git"
+      - run: pytest -q
+
+  # The 50 tickets and the safety suite through the whole pipeline (rule-based engine), gated against a committed baseline.
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: testadmin
+        ports: ["55434:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -h 127.0.0.1"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed
+      RELAY_ADMIN_DATABASE_URL: postgresql://postgres:testadmin@127.0.0.1:55434/postgres
+      RELAY_APP_DB_PASSWORD: ci-app-password
+      RELAY_DATABASE_URL: postgresql://relay_app:ci-app-password@127.0.0.1:55434/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .fastembed
+          key: fastembed-bge-small-en-v1.5
+      - run: pip install -e . && python -m app.bootstrap
+      - uses: devhamza246/gauge@main
+        with:
+          config: eval/gauge.yml
+          baseline: eval/gauge-baseline.json
+          extra-requirements: "-e ."

@@ -1,0 +1,108 @@
+# Relay: Postgres (pgvector) + Redis + one-shot bootstrap + API + widget/demo UI.
+#   cp .env.example .env        (set the two database passwords)
+#   docker network create ingress_default   (only if you have no shared reverse-proxy network)
+#   docker compose --env-file .env up -d --build --wait
+#   open http://localhost:8817
+# Safe by default: RELAY_LLM_MODE=replay with no API key in the container (recorded answers plus a rule-based engine) and a
+# dry-run Slack handoff.
+name: relay
+
+services:
+  postgres:
+    container_name: relay-postgres
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: relay_admin
+      POSTGRES_PASSWORD: ${RELAY_ADMIN_DB_PASSWORD:?set RELAY_ADMIN_DB_PASSWORD in .env}
+      POSTGRES_DB: relay
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relay_admin -d relay -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks: [default]
+
+  redis:
+    container_name: relay-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [default]
+
+  # One-shot: schema, least-privilege role, help center index, mock orders. The only service with the admin credentials.
+  bootstrap:
+    container_name: relay-bootstrap
+    build: .
+    image: relay-app:latest
+    restart: "no"
+    command: ["python", "-m", "app.bootstrap"]
+    environment:
+      RELAY_ADMIN_DATABASE_URL: postgresql://relay_admin:${RELAY_ADMIN_DB_PASSWORD}@postgres:5432/relay
+      RELAY_APP_DB_PASSWORD: ${RELAY_APP_DB_PASSWORD:?set RELAY_APP_DB_PASSWORD in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [default]
+
+  api:
+    container_name: relay-api
+    image: relay-app:latest
+    restart: unless-stopped
+    environment:
+      RELAY_DATABASE_URL: postgresql://relay_app:${RELAY_APP_DB_PASSWORD}@postgres:5432/relay
+      RELAY_REDIS_URL: redis://redis:6379/0
+      # replay (default) and rules never call the API. "live" needs ANTHROPIC_API_KEY and spends money.
+      RELAY_LLM_MODE: ${RELAY_LLM_MODE:-replay}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RELAY_DAILY_SPEND_CAP_USD: ${RELAY_DAILY_SPEND_CAP_USD:-0.25}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      RELAY_SLACK_MAX_PER_HOUR: ${RELAY_SLACK_MAX_PER_HOUR:-20}
+      RELAY_ADMIN_TOKEN: ${RELAY_ADMIN_TOKEN:-}
+      RELAY_RETENTION_HOURS: ${RELAY_RETENTION_HOURS:-24}
+      RELAY_RATE_LIMIT_PER_MIN: ${RELAY_RATE_LIMIT_PER_MIN:-20}
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    ports:
+      - "127.0.0.1:${RELAY_API_PORT:-8816}:8000"
+    networks: [default, ingress_default]
+
+  ui:
+    container_name: relay-ui
+    build: ./ui
+    image: relay-ui:latest
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    ports:
+      - "127.0.0.1:${RELAY_UI_PORT:-8817}:8080"
+    networks: [default, ingress_default]
+
+volumes:
+  pgdata:
+
+networks:
+  ingress_default:
+    external: true

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "relay-support"
+version = "0.1.0"
+description = "Customer support agent: cited answers from a help center, order and ticket tools, and a human handoff with full context."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Hamza Hameed" }]
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+  "psycopg[binary,pool]>=3.1",
+  "redis>=5",
+  "httpx>=0.27",
+  "pydantic>=2.6",
+  "pyyaml>=6.0",
+  "fastembed>=0.4",
+  "anthropic>=0.60",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["app*", "eval*"]
+
+[tool.setuptools.package-data]
+app = ["helpcenter/*.md", "sample/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relay · support agent with human handoff</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Relay</h1>
+    <p>A support agent that answers from a help center <strong>with citations</strong>, and hands off to a person <strong>with full context</strong> when it should not answer.</p>
+    <p class="notice">Demo. Fernwick Goods, its help center, customers and orders are fictional; the order API is a mock. Conversations are deleted after <span id="retention">24</span> hours. Do not enter real personal data.</p>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="try">
+      <h2 id="try">1. Try it</h2>
+      <div class="row">
+        <label>Signed in as <select id="customer"></select></label>
+        <label>Engine <select id="engine"></select></label>
+      </div>
+      <p id="engine-note" class="muted"></p>
+      <div id="chips" class="chips"></div>
+      <p class="muted">Each button starts a new chat and sends that message. The chat opens at the bottom right; you can also type your own.</p>
+    </section>
+
+    <section class="card" aria-labelledby="inside">
+      <h2 id="inside">2. What the agent decided</h2>
+      <div id="decision" class="muted">Send a message to see triage, retrieval, tools and timing for the latest turn.</div>
+    </section>
+
+    <section class="card wide" aria-labelledby="agent">
+      <h2 id="agent">3. What the human agent receives</h2>
+      <div id="handoff" class="muted">When the conversation is handed off, the ticket and the exact Slack message appear here. Try “Billing dispute”.</div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://github.com/devhamza246/relay">Source and test results on GitHub</a>
+    · <span id="meta"></span>
+  </footer>
+
+  <script src="widget.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>
