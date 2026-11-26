@@ -1,0 +1,42 @@
+# Fictional data for the mock order API. Not a real store, customer or carrier.
+customers:
+  - email: maya.chen@example.com
+    name: Maya Chen
+  - email: leo.ortiz@example.com
+    name: Leo Ortiz
+orders:
+  - id: FW-10482
+    customer: maya.chen@example.com
+    status: shipped
+    placed: "2026-11-20"
+    items: ["Tern task chair"]
+    total: "249.00"
+    detail: "Shipped with ParcelOne on 2026-11-23, tracking PO-88213, estimated delivery 2026-11-28."
+  - id: FW-10517
+    customer: maya.chen@example.com
+    status: processing
+    placed: "2026-11-25"
+    items: ["Quill wireless keyboard", "Glim desk lamp"]
+    total: "118.00"
+    detail: "Being packed in the warehouse. It has not shipped yet."
+  - id: FW-10533
+    customer: leo.ortiz@example.com
+    status: delivered
+    placed: "2026-11-12"
+    items: ["Perch monitor arm"]
+    total: "89.00"
+    detail: "Delivered on 2026-11-17 at 14:05, left at the front door."
+  - id: FW-10560
+    customer: leo.ortiz@example.com
+    status: delayed
+    placed: "2026-11-16"
+    items: ["Rise standing desk"]
+    total: "529.00"
+    detail: "Held at a carrier hub because of weather. New estimated delivery 2026-12-01."
+  - id: FW-10591
+    customer: maya.chen@example.com
+    status: cancelled
+    placed: "2026-11-10"
+    items: ["Peek webcam"]
+    total: "59.00"
+    detail: "Cancelled on 2026-11-10 at the customer's request. No charge was taken."

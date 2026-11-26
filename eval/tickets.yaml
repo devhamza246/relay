@@ -1,0 +1,60 @@
+# The 50-ticket test set. Written and committed BEFORE any pipeline code or tuning (see git history).
+# Same author as the help center and the rules, so it is not an independent benchmark.
+#
+# outcome:
+#   answered        bot resolves it: cites one of `articles` and the answer matches every `facts` regex
+#   order_status    bot resolves it with the order tool: cites the order and matches `facts`
+#   ticket_created  bot opens a ticket (counts as correct, NOT as auto-resolution: a person still has to act)
+#   escalated       handoff to a human on the final turn, with `reason`; earlier turns must not escalate
+#   unknown         bot says it does not know and offers a human; no escalation, no factual claim
+# `customer` is the signed-in demo customer (default maya.chen@example.com).
+- {id: t01, turns: ["How many days do I have to send something back?"], expect: {outcome: answered, articles: [return-window], facts: ['30[ -]day']}}
+- {id: t02, turns: ["what does express delivery cost"], expect: {outcome: answered, articles: [shipping-options], facts: ['\$14\.95']}}
+- {id: t03, turns: ["Is there a spend threshold for free shipping?"], expect: {outcome: answered, articles: [shipping-options], facts: ['\$50']}}
+- {id: t04, turns: ["If I order at 4pm today will it go out today?"], expect: {outcome: answered, articles: [order-cutoff], facts: ['2:00 ?PM', 'next business day']}}
+- {id: t05, turns: ["I just placed an order and want to cancel it. How long do I have?"], expect: {outcome: answered, articles: [change-cancel-order], facts: ['60[ -]minute']}}
+- {id: t06, turns: ["Do you deliver to Canada, and how long does it take?"], expect: {outcome: answered, articles: [international-shipping], facts: ['7 to 14 business days']}}
+- {id: t07, turns: ["My tracking says delivered but there's nothing at my door. What should I do?"], expect: {outcome: answered, articles: [delivered-not-received], facts: ['14 days']}}
+- {id: t08, turns: ["How much is gift wrap?"], expect: {outcome: answered, articles: [gift-orders], facts: ['\$4\.95']}}
+- {id: t09, turns: ["How do I start a return?"], expect: {outcome: answered, articles: [start-return], facts: ['(?i)orders', '(?i)label']}}
+- {id: t10, turns: ["Do I have to pay to return an item that I simply don't want?"], expect: {outcome: answered, articles: [return-fees], facts: ['\$6\.95']}}
+- {id: t11, turns: ["How long until my refund shows up after you receive the return?"], expect: {outcome: answered, articles: [refund-timing], facts: ['5 to 10 business days']}}
+- {id: t12, turns: ["Can I return a gift card?"], expect: {outcome: answered, articles: [non-returnable], facts: ['(?i)cannot be returned']}}
+- {id: t13, turns: ["The lamp arrived smashed. What's the deadline to report it?"], expect: {outcome: answered, articles: [damaged-item], facts: ['7 days']}}
+- {id: t14, turns: ["How long is the warranty on your desks and chairs?"], expect: {outcome: answered, articles: [warranty], facts: ['5[ -]year']}}
+- {id: t15, turns: ["Which payment methods do you take?"], expect: {outcome: answered, articles: [payment-methods], facts: ['(?i)paypal', '(?i)visa']}}
+- {id: t16, turns: ["When will my card actually be charged?"], expect: {outcome: answered, articles: [when-charged], facts: ['(?i)when the order ships']}}
+- {id: t17, turns: ["How do I change the card on my account?"], expect: {outcome: answered, articles: [update-card], facts: ['(?i)payment methods']}}
+- {id: t18, turns: ["Why was my payment declined?"], expect: {outcome: answered, articles: [payment-declined], facts: ['(?i)billing address']}}
+- {id: t19, turns: ["Do gift cards expire?"], expect: {outcome: answered, articles: [gift-cards], facts: ['(?i)never expire']}}
+- {id: t20, turns: ["Can I use two promo codes on one order?"], expect: {outcome: answered, articles: [promo-codes], facts: ['(?i)only one']}}
+- {id: t21, turns: ["The price dropped a few days after I bought it. Can I get the difference?"], expect: {outcome: answered, articles: [price-adjustment], facts: ['14 days', '(?i)store credit']}}
+- {id: t22, turns: ["I forgot my password, how long is the reset link good for?"], expect: {outcome: answered, articles: [reset-password], facts: ['30 minutes']}}
+- {id: t23, turns: ["My account got locked after a few wrong passwords. How long do I wait?"], expect: {outcome: answered, articles: [locked-account], facts: ['15 minutes']}}
+- {id: t24, turns: ["How do I turn on two factor authentication?"], expect: {outcome: answered, articles: [two-factor], facts: ['(?i)security']}}
+- {id: t25, turns: ["What's the yearly price of Plus?"], expect: {outcome: answered, articles: [plus-price], facts: ['\$49']}}
+- {id: t26, turns: ["How do I cancel my Fernwick Plus membership?"], expect: {outcome: answered, articles: [plus-cancel], facts: ['(?i)membership']}}
+- {id: t27, turns: ["Is there a free trial for Plus and how long is it?"], expect: {outcome: answered, articles: [plus-trial], facts: ['30[ -]day']}}
+- {id: t28, turns: ["My standing desk shows E01 and won't move"], expect: {outcome: answered, articles: [desk-reset], facts: ['30 seconds', '(?i)down button']}}
+- {id: t29, turns: ["What's the maximum weight the Rise desk can hold?"], expect: {outcome: answered, articles: [desk-specs], facts: ['120 ?kg|265 ?lb']}}
+- {id: t30, turns: ["Will the monitor arm hold a 32 inch screen? What's the biggest it takes?"], expect: {outcome: answered, articles: [monitor-arm], facts: ['34 ?inch']}}
+- {id: t31, turns: ["How do I pair the Quill keyboard with my laptop?"], expect: {outcome: answered, articles: [keyboard-pairing], facts: ['(?i)Fn', '(?i)bluetooth']}}
+- {id: t32, turns: ["people on calls can't hear me through the Murmur headset"], expect: {outcome: answered, articles: [headset-mic], facts: ['(?i)mute']}}
+- {id: t33, turns: ["What are your support opening hours on Saturday?"], expect: {outcome: answered, articles: [support-hours], facts: ['9:00 ?AM', '5:00 ?PM']}}
+- {id: t34, turns: ["Where is my order FW-10482?"], expect: {outcome: order_status, order: FW-10482, facts: ['(?i)shipped']}}
+- {id: t35, turns: ["status of fw-10517 please"], expect: {outcome: order_status, order: FW-10517, facts: ['(?i)processing|not shipped']}}
+- {id: t36, customer: leo.ortiz@example.com, turns: ["Can you tell me if FW-10533 has been delivered?"], expect: {outcome: order_status, order: FW-10533, facts: ['(?i)delivered']}}
+- {id: t37, customer: leo.ortiz@example.com, turns: ["I'm still waiting for my desk, order number FW-10560. Any news?"], expect: {outcome: order_status, order: FW-10560, facts: ['(?i)delayed|weather', '2026-12-01']}}
+- {id: t38, turns: ["Can you check on my order?", "It's FW-10591"], expect: {outcome: order_status, order: FW-10591, facts: ['(?i)cancelled']}}
+- {id: t39, turns: ["Please open a ticket: the desktop on my new desk has a scratch along one edge."], expect: {outcome: ticket_created}}
+- {id: t40, turns: ["Can you log a support request for me? I need a quote for 25 task chairs for our office."], expect: {outcome: ticket_created}}
+- {id: t41, turns: ["I was charged twice for order FW-10482. I want the extra charge reversed."], expect: {outcome: escalated, reason: billing_dispute}}
+- {id: t42, turns: ["There's a $249 charge on my statement from you that I never authorised."], expect: {outcome: escalated, reason: billing_dispute}}
+- {id: t43, turns: ["If this isn't fixed this week my lawyer will be contacting you."], expect: {outcome: escalated, reason: legal}}
+- {id: t44, turns: ["I'm going to take you to small claims court over this desk."], expect: {outcome: escalated, reason: legal}}
+- {id: t45, turns: ["This is absolutely ridiculous!! Worst company I have ever dealt with, I'm furious."], expect: {outcome: escalated, reason: angry}}
+- {id: t46, turns: ["You people are useless. THREE WEEKS and still nothing. Totally unacceptable."], expect: {outcome: escalated, reason: angry}}
+- {id: t47, turns: ["Do you price match a competitor's student bundle in Norway?", "Can you tell me which of your factories made my chair?"], expect: {outcome: escalated, reason: repeat_failure}}
+- {id: t48, turns: ["How do I return an item?", "That didn't help.", "No, that still doesn't answer my question."], expect: {outcome: escalated, reason: repeat_failure}}
+- {id: t49, turns: ["Can I rent a standing desk for a month?"], expect: {outcome: unknown}}
+- {id: t50, turns: ["What's your CEO's personal phone number?"], expect: {outcome: unknown}}

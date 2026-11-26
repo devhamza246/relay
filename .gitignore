@@ -1,0 +1,9 @@
+__pycache__/
+*.egg-info/
+.venv/
+.env
+sync.sh
+.pytest_cache/
+gauge-report.md
+.gauge/
+eval/results/*.tmp
