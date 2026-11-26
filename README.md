@@ -150,22 +150,28 @@ Known gaps in the guarantees:
 
 ## The public demo
 
-The public deployment calls the **real model**, with a budget of **$0.05 per day** (about 20 answered questions).
+The public demo **answers live up to a small daily cap and otherwise replays recordings** (`RELAY_LLM_MODE=auto`).
 
 | Engine | What it does |
 |---|---|
-| Live model (default) | Claude triage, answers and handoff summaries for any text. Messages are sent to the Anthropic API. |
+| Recorded first, then live (default) | A request recorded in [`eval/cassette.jsonl`](eval/cassette.jsonl) (the suggested buttons and the test sets) is replayed for free. Anything else is sent to the Claude API, within the limits below. Public traffic is never added to the recordings. |
 | Rule-based | No model. Type anything; expect the weaknesses listed above. |
 
-When the day's budget is used up, triage falls back to the keyword rules and a knowledge question gets "I couldn't produce
-an answer" with an offer of a human; a second one triggers a handoff. Escalation is much weaker in that state (see the
-holdout). The budget is checked before each call and held in memory, so a restart resets it and simultaneous requests can
-overshoot it slightly. The latency and score tables above come from the benchmark runs, not from public traffic.
+| Limit | Value |
+|---|---|
+| Spend, all visitors | $0.05 per UTC day (about 20 live answers) |
+| Live messages per visitor (by IP address, stored hashed) | 8 per UTC day |
 
-The compose default is `replay`, which needs no key and cannot spend: it replays the real model's responses from
-[`eval/cassette.jsonl`](eval/cassette.jsonl) and says so when a question was not recorded. Replaying reproduces the
-benchmark run's scores exactly, and CI gates on this. The demo shows the retention period, uses fictional identities and
-asks visitors not to enter personal data.
+The status line shows what is left. When either limit is reached, a new knowledge question gets a plain message saying the
+live allowance is used up and that the recorded examples still work. It does not count as a failed answer. Recordings,
+order lookups, tickets and keyword escalation keep working. **Escalation of new phrasing is much weaker then**, because
+triage falls back to the keyword rules (1 of 12 on the holdout). The spend cap is held in memory and checked before each
+call, so an API restart resets it and simultaneous requests can overshoot it slightly; visitor counts are in Redis. The
+score and latency tables above come from the benchmark runs, not from public traffic.
+
+The compose default is `replay`, which needs no key and cannot spend. Replaying the cassette reproduces the benchmark
+run's scores exactly, and CI gates on this. The demo shows the retention period, uses fictional identities and asks
+visitors not to enter personal data.
 
 ## Run it
 
@@ -179,7 +185,7 @@ docker compose --env-file .env up -d --build --wait
 
 | Setting | Effect |
 |---|---|
-| `RELAY_LLM_MODE=live` + `ANTHROPIC_API_KEY` | Real model, capped by `RELAY_DAILY_SPEND_CAP_USD` (default $0.25 per day, held in memory, resets on restart). |
+| `RELAY_LLM_MODE=auto` + `ANTHROPIC_API_KEY` | Recordings first, live on a miss. `live` always calls the model. Both are capped by `RELAY_DAILY_SPEND_CAP_USD` (default $0.05; 0 allows no call) and `RELAY_VISITOR_LIVE_PER_DAY` (default 8; 0 means no per-visitor limit). |
 | `SLACK_WEBHOOK_URL` | Handoffs are posted to Slack (at most `RELAY_SLACK_MAX_PER_HOUR`). On a public demo, any visitor can trigger one. |
 | `RELAY_ADMIN_TOKEN` | Enables the conversation export endpoint. |
 
