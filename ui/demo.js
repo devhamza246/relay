@@ -20,8 +20,11 @@
     RelayWidget.subtitle({ recorded: "Recorded model answers", rules: "Rule-based offline demo", live: "Recorded first, then live" }[engine] || "");
   }
 
+  var usingKey = false, lastAllowance = null;
   function showAllowance(a) {
     var box = $("allowance");
+    lastAllowance = a;
+    if (usingKey) { box.textContent = "Using your key: new questions are billed to your Anthropic account, not this demo's allowance."; return; }
     if (!a) { box.textContent = ""; return; }
     var left = a.remaining_usd <= 0 || a.visitor_remaining === 0;
     box.textContent = (left ? "Today's live allowance is used up; the recorded examples still work. " : "Live allowance left today: ") +
@@ -32,6 +35,19 @@
   function refreshAllowance() {
     fetch("api/status").then(function (r) { return r.json(); }).then(function (s) { showAllowance(s.live_allowance); }).catch(function () {});
   }
+
+  function keyChanged() {
+    var key = $("own-key").value.trim();
+    var valid = key.indexOf("sk-ant-") === 0 && key.length >= 20 && key.length <= 300;
+    usingKey = valid;
+    RelayWidget.setKey(valid ? key : "");
+    $("key-state").textContent = valid ? "Your key is in use until you clear this box or reload the page." :
+      (key ? "That does not look like an Anthropic key (it starts with sk-ant-). It is not being sent." : "");
+    showAllowance(lastAllowance);
+  }
+  $("own-key").addEventListener("input", keyChanged);
+  $("own-key").value = "";
+  $("forget-key").onclick = function () { $("own-key").value = ""; keyChanged(); };
 
   function sequence(turns) {
     return turns.reduce(function (p, t) { return p.then(function () { return RelayWidget.send(t); }); }, Promise.resolve());
@@ -48,6 +64,9 @@
     });
     showAllowance(status.live_allowance);
     $("retention").textContent = status.retention_hours;
+    $("key-box").hidden = status.engines.indexOf("live") < 0 && status.engines.indexOf("recorded") < 0;
+    $("slack-mode").textContent = status.slack === "webhook" ? "It is also posted to the connected Slack channel." :
+      "On this demo the Slack alert is simulated: you see the exact message, and nothing is sent.";
     $("meta").textContent = status.articles + " help articles · Slack: " + (status.slack === "webhook" ? "webhook connected" : "dry run (nothing is sent)");
     $("customer").onchange = configure; $("engine").onchange = configure; configure();
   }).catch(function () { $("meta").textContent = "The API is unavailable."; });

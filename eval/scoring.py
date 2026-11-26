@@ -8,7 +8,7 @@ import re
 from functools import lru_cache
 
 from app.kb import load_articles
-from app.machine import ALLOWANCE_USED, ASK_ORDER, DECLINED, FEEDBACK, HANDOFF_LEAD, NOT_RECORDED, SMALLTALK_REPLY, THANKS_REPLY, UNKNOWN
+from app.machine import ALLOWANCE_USED, ASK_ORDER, DECLINED, FEEDBACK, KEY_FAILED, HANDOFF_LEAD, NOT_RECORDED, SMALLTALK_REPLY, THANKS_REPLY, UNKNOWN
 
 CLAIM_OUTCOMES = ("answered", "order_status", "ticket_created")
 
@@ -18,7 +18,7 @@ def _articles() -> dict[str, str]:
     return {a.slug: f"{a.title}. {a.body}" for a in load_articles()}
 
 
-_TEMPLATES = [re.escape(t) for t in (ASK_ORDER, DECLINED, FEEDBACK, NOT_RECORDED, SMALLTALK_REPLY, THANKS_REPLY, UNKNOWN, *ALLOWANCE_USED.values())]
+_TEMPLATES = [re.escape(t) for t in (ASK_ORDER, DECLINED, FEEDBACK, NOT_RECORDED, SMALLTALK_REPLY, THANKS_REPLY, UNKNOWN, KEY_FAILED, *ALLOWANCE_USED.values())]
 _TEMPLATES += [re.escape(lead) + r" Your ticket is FWT-\d+\. The agent gets this conversation and a summary, so you won't need to repeat yourself\."
                for lead in HANDOFF_LEAD.values()]
 _TEMPLATES += [r"I can't find order FW-\d{5} on your account\. Please check the number, or ask me for a human agent\.",

@@ -5,6 +5,7 @@
   var script = document.currentScript;
   var API = ((script && script.dataset.api) || "").replace(/\/$/, "");
   var session = null, busy = false, options = {};
+  var ownKey = "";  // the visitor's own API key: this variable only, never written to browser storage
 
   var host = document.createElement("div");
   var root = host.attachShadow({ mode: "open" });
@@ -59,8 +60,10 @@
     window.dispatchEvent(new CustomEvent("relay:reset"));
   }
 
-  function request(path, body) {
-    return fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+  function request(path, body, extra) {
+    var headers = { "Content-Type": "application/json" };
+    if (extra) Object.keys(extra).forEach(function (k) { headers[k] = extra[k]; });
+    return fetch(API + path, { method: "POST", headers: headers, body: JSON.stringify(body) })
       .then(function (r) {
         if (r.ok) return r;
         return r.json().catch(function () { return {}; }).then(function (d) {
@@ -144,7 +147,9 @@
     bubble.appendChild(status); log.appendChild(bubble); scroll();
     var started = performance.now(), first = null, reply = "", finished = false;
     return ensureSession()
-      .then(function (sid) { return request("/api/sessions/" + sid + "/messages", { text: text }); })
+      .then(function (sid) {
+        return request("/api/sessions/" + sid + "/messages", { text: text }, ownKey ? { "X-Anthropic-Key": ownKey } : null);
+      })
       .then(function (response) {
         return readStream(response, function (event) {
           if (event.type === "status" && !reply) status.textContent = event.text + "...";
@@ -180,6 +185,7 @@
     open: open, close: close, reset: reset,
     send: submit,
     configure: function (next) { options = next; },
+    setKey: function (key) { ownKey = (key || "").trim(); },
     busy: function () { return busy; },
     subtitle: function (text) { $("header small").textContent = text; }
   };

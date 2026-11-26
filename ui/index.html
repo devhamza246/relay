@@ -15,6 +15,20 @@
   </header>
 
   <main>
+    <section class="card wide" aria-labelledby="what">
+      <h2 id="what">What is this?</h2>
+      <p>Relay is a customer support agent for an online store. It answers routine questions from the store's help center, checks the signed-in customer's orders, opens tickets, and passes the conversation to a person when it should not handle it alone.</p>
+      <p><strong>Problems it solves:</strong> support teams answering the same questions all day, chatbots that make things up or argue with an upset customer, and handoffs where the customer has to explain everything again. Relay cites its source on every answer, says when it does not know, and gives the human a summary and the full transcript.</p>
+      <h3>How to use it</h3>
+      <ol class="steps">
+        <li><strong>Ask.</strong> Press a button under “Try it”, or open the chat at the bottom right and type your own question.</li>
+        <li><strong>Check the source.</strong> Click a number in a reply to read the help article or order record behind it.</li>
+        <li><strong>See why.</strong> “What the agent decided” shows how the message was classified, what was retrieved and how long it took.</li>
+        <li><strong>Trigger a handoff.</strong> Press “Billing dispute”, ask for a person, or ask something it cannot answer and then reply “yes” to the offer. Two failed answers also hand off.</li>
+        <li><strong>Be the support agent.</strong> “What the human agent receives” shows the ticket, summary, suspected intent and transcript. <span id="slack-mode"></span></li>
+      </ol>
+    </section>
+
     <section class="card" aria-labelledby="try">
       <h2 id="try">1. Try it</h2>
       <div class="row">
@@ -25,6 +39,15 @@
       <p id="allowance" class="muted" role="status"></p>
       <div id="chips" class="chips"></div>
       <p class="muted">Each button starts a new chat and sends that message. The chat opens at the bottom right; you can also type your own.</p>
+      <details id="key-box">
+        <summary>Use your own Anthropic key (optional)</summary>
+        <div class="row key-row">
+          <input id="own-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." aria-label="Your Anthropic API key">
+          <button type="button" id="forget-key">Clear</button>
+        </div>
+        <p id="key-state" class="muted" role="status"></p>
+        <p class="muted">With your key, new questions are answered live without using this demo's allowance, and you pay Anthropic (typically well under a cent per question). The key stays in this page's memory only, is sent with each message to this server, which passes it to Anthropic, and is never stored, logged or recorded. Create a separate key with a low spend limit and delete it afterwards. It applies to the “Recorded first, then live” engine.</p>
+      </details>
     </section>
 
     <section class="card" aria-labelledby="inside">

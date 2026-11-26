@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -36,6 +37,10 @@ class AllowanceExhausted(LLMError):
     def __init__(self, scope: str):
         super().__init__("the daily spend cap has been reached" if scope == "global" else "this visitor's daily limit has been reached")
         self.scope = scope
+
+
+class OwnKeyError(LLMError):
+    """A call made with the visitor's own key failed (rejected, out of credit, rate limited...)."""
 
 
 @dataclass
@@ -175,16 +180,31 @@ class ModelEngine:
         self.s, self.cassette, self.budget, self.replay_only = settings, cassette, budget, replay_only
         self.name = "recorded" if replay_only else "live"
         self.gate: LiveGate | None = None  # set on a per-message copy
+        self.own_key = ""  # a visitor's key, only ever on a per-message copy
         self._client = client
         if client is None and not replay_only and settings.anthropic_key:
             self._client = self._make_client()  # at startup, not during the first customer's message
 
-    def _make_client(self):
+    def _make_client(self, api_key: str = ""):
         import anthropic
 
-        return anthropic.Anthropic(api_key=self.s.anthropic_key, timeout=30, max_retries=1)
+        return anthropic.Anthropic(api_key=api_key or self.s.anthropic_key, timeout=30, max_retries=1)
+
+    def with_key(self, api_key: str) -> "ModelEngine":
+        """A copy for one message that calls the model with the visitor's own key. The visitor pays, so neither the daily cap
+        nor the per-visitor limit applies; nothing it produces is recorded, and the key lives only on this object."""
+        own = copy.copy(self)
+        own.own_key, own.gate, own.replay_only, own.name, own._client = api_key, None, False, "live", None
+        return own
+
+    def _failure(self, role: str, exc: Exception) -> LLMError:
+        return (OwnKeyError if self.own_key else LLMError)(f"{role} call failed: {type(exc).__name__}")
 
     def _anthropic(self):
+        if self.own_key:
+            if self._client is None:
+                self._client = self._make_client(self.own_key)
+            return self._client
         if self.replay_only:
             raise ReplayMiss("no recorded response (recorded-answer mode never calls the API)")
         if self._client is None:
@@ -203,6 +223,8 @@ class ModelEngine:
 
     def _finish(self, usage: Usage, key: str, text: str, record: bool = True) -> None:
         usage.cost_usd = cost_of(usage.model, usage.input_tokens, usage.output_tokens)
+        if self.own_key:
+            return  # the visitor's own spend: not counted against the demo and never recorded
         self.budget.add(usage.cost_usd)
         if record and self.s.llm_mode == "record":
             self.cassette.add({"key": key, "role": usage.role, "model": usage.model, "text": text,
@@ -224,7 +246,7 @@ class ModelEngine:
             text = "".join(b.text for b in msg.content if b.type == "text")
             data = json.loads(text)
         except Exception as exc:  # any provider or parsing failure: the caller falls back to rules/templates
-            raise LLMError(f"{role} call failed: {type(exc).__name__}") from exc
+            raise self._failure(role, exc) from None
         usage = Usage(role, model, msg.usage.input_tokens, msg.usage.output_tokens, (time.perf_counter() - start) * 1000)
         self._finish(usage, key, text)
         return data, usage
@@ -254,7 +276,7 @@ class ModelEngine:
                     yield delta
                 final = stream.get_final_message()
         except Exception as exc:
-            raise LLMError(f"answer call failed: {type(exc).__name__}") from exc
+            raise self._failure("answer", exc) from None
         record = Usage("answer", model, final.usage.input_tokens, final.usage.output_tokens,
                        (time.perf_counter() - start) * 1000, first)
         usage.append(record)

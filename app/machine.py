@@ -19,7 +19,8 @@ from typing import Iterator
 from . import prompts, rules
 from .citations import SentenceSplitter, check_sentence
 from .config import Settings
-from .llm import AllowanceExhausted, LiveGate, LLMError, ReplayMiss, RuleEngine, Usage, format_transcript, template_summary
+from .llm import (AllowanceExhausted, LiveGate, LLMError, OwnKeyError, ReplayMiss, RuleEngine, Usage, format_transcript,
+                  template_summary)
 from .redact import redact
 from .retrieval import Retriever
 from .sessions import new_state
@@ -33,10 +34,12 @@ NOT_RECORDED = ("This public demo replays recorded model answers and never calls
                 "Try one of the suggested questions, or switch the engine to \"Rule-based\" to type anything.")
 ALLOWANCE_USED = {
     "global": ("Today's live allowance for this demo is used up, so I can't answer new questions until tomorrow (UTC). "
-               "The recorded examples still work: try one of the suggested buttons."),
+               "The recorded examples still work: try one of the suggested buttons, or add your own Anthropic key on the demo page."),
     "visitor": ("You've used today's live allowance for this demo, so I can't answer new questions for you until tomorrow (UTC). "
-                "The recorded examples still work: try one of the suggested buttons."),
+                "The recorded examples still work: try one of the suggested buttons, or add your own Anthropic key on the demo page."),
 }
+KEY_FAILED = ("I couldn't get an answer using your Anthropic key. Check that it is valid and has credit, or remove it to use "
+              "the demo's own allowance.")
 SMALLTALK_REPLY = "Hi, I'm Relay, the Fernwick Goods support assistant. Ask me about orders, returns, billing, your account or our products."
 THANKS_REPLY = "You're welcome. Is there anything else I can help with?"
 ASK_ORDER = "I can check that. What is the order number? It looks like FW-12345."
@@ -64,18 +67,18 @@ class Machine:
         self.sessions.save(sid, new_state(customer, engine))
         return sid
 
-    def handle(self, sid: str, text: str, visitor: str = "") -> Iterator[dict]:
+    def handle(self, sid: str, text: str, visitor: str = "", own_key: str = "") -> Iterator[dict]:
         with self.sessions.lock(sid):
             state = self.sessions.load(sid)
             if state is None:
                 raise KeyError(sid)
-            turn = _Turn(self, sid, state, redact(text.strip()), visitor)
+            turn = _Turn(self, sid, state, redact(text.strip()), visitor, own_key)
             yield from turn.run()
 
-    def run(self, sid: str, text: str, visitor: str = "") -> dict:
+    def run(self, sid: str, text: str, visitor: str = "", own_key: str = "") -> dict:
         """Non-streaming convenience for tests and evals: the final event, plus timings."""
         start, first, done = time.perf_counter(), None, {}
-        for event in self.handle(sid, text, visitor):
+        for event in self.handle(sid, text, visitor, own_key):
             if event["type"] == "token" and first is None:
                 first = (time.perf_counter() - start) * 1000
             if event["type"] == "done":
@@ -131,12 +134,16 @@ class _Speculation:
 
 
 class _Turn:
-    def __init__(self, machine: Machine, sid: str, state: dict, message: str, visitor: str = ""):
+    def __init__(self, machine: Machine, sid: str, state: dict, message: str, visitor: str = "", own_key: str = ""):
         self.m, self.sid, self.state, self.message = machine, sid, state, message
         self.engine = machine.engines.get(state["engine"]) or machine.rules_engine
-        if hasattr(self.engine, "gate"):  # a per-message copy sharing the client, cassette and budget
-            self.engine = copy.copy(self.engine)
-            self.engine.gate = LiveGate(machine.sessions, visitor, machine.s.visitor_live_per_day)
+        self.used_own_key = False
+        if hasattr(self.engine, "gate"):  # a model engine: work on a per-message copy
+            if own_key:
+                self.engine, self.used_own_key = self.engine.with_key(own_key), True
+            else:  # shares the client, cassette and budget
+                self.engine = copy.copy(self.engine)
+                self.engine.gate = LiveGate(machine.sessions, visitor, machine.s.visitor_live_per_day)
         self.usage: list[Usage] = []
         self.notes: list[str] = []
         self.reply = ""
@@ -160,6 +167,8 @@ class _Turn:
         called = any(u.input_tokens and not u.cached for u in self.usage)
         if engine == "live" and not called and any(u.cached for u in self.usage):
             engine = "recorded"  # everything in this reply came from the cassette
+        if self.used_own_key:
+            self.meta["own_key"] = True  # the fact only; the key itself is never part of any record
         data = {"outcome": outcome, "state": self.state["state"], "failed_answers": self.state["failed"],
                 "engine": engine, **self.meta, **extra}
         self.m.sessions.save(self.sid, self.state)
@@ -262,7 +271,9 @@ class _Turn:
             self.usage.append(usage)
             return {"intent": data["intent"], "sentiment": data["sentiment"], "urgency": data["urgency"], "source": usage.model}
         except (LLMError, KeyError, TypeError) as exc:
-            if isinstance(exc, AllowanceExhausted):
+            if isinstance(exc, OwnKeyError):
+                self.notes.append("Your Anthropic key could not be used: rule-based triage was used.")
+            elif isinstance(exc, AllowanceExhausted):
                 self.notes.append("Live allowance used up: rule-based triage was used.")
             elif not isinstance(exc, ReplayMiss):
                 self.notes.append("Model triage was unavailable; rule-based triage was used.")
@@ -310,6 +321,13 @@ class _Turn:
             yield from self.say(ALLOWANCE_USED[exc.scope])
             yield from self.finish("allowance_used")
             return
+        except OwnKeyError as exc:  # not the customer's failure either
+            self.notes.append(f"Call with your key failed ({exc}).")
+            if not self.reply:
+                self.usage.extend(draft.usage)
+                yield from self.say(KEY_FAILED)
+                yield from self.finish("key_error")
+                return
         except LLMError as exc:
             self.notes.append(f"The answer model failed ({exc}).")
             if not self.reply:

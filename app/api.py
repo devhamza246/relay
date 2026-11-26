@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import queue
+import re
 import secrets
 import threading
 import time
@@ -24,6 +25,15 @@ from .slack import SlackClient
 from .store import Store, make_pool
 
 log = logging.getLogger("relay")
+OWN_KEY = re.compile(r"sk-ant-[A-Za-z0-9_-]+")
+
+
+def own_key(request: Request) -> str:
+    """A visitor's own Anthropic key, for this request only. Never stored or logged, and never echoed back in an error."""
+    key = (request.headers.get("x-anthropic-key") or "").strip()
+    if key and not (20 <= len(key) <= 300 and OWN_KEY.fullmatch(key)):
+        raise HTTPException(400, "That does not look like an Anthropic API key (it starts with sk-ant-).")
+    return key
 
 SUGGESTIONS = [
     {"label": "Returns", "turns": ["How many days do I have to send something back?"]},
@@ -80,13 +90,13 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
             raise HTTPException(404, "unknown or expired conversation")
         return state
 
-    def stream_turn(sid: str, text: str, visitor: str):
+    def stream_turn(sid: str, text: str, visitor: str, key: str):
         """The turn runs in its own thread, so a handoff still completes if the browser disconnects mid-reply."""
         events: queue.Queue = queue.Queue()
 
         def work() -> None:
             try:
-                for event in machine.handle(sid, text, visitor):
+                for event in machine.handle(sid, text, visitor, key):
                     events.put(event)
             except Busy:
                 events.put({"type": "error", "text": "Still answering your previous message. Please wait a moment."})
@@ -141,6 +151,7 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
     @app.post("/api/sessions/{sid}/messages")
     def message(sid: str, body: NewMessage, request: Request) -> StreamingResponse:
         limit(request, "message", s.rate_limit_per_min)
+        key = own_key(request)
         state = session(sid)
         text = body.text.strip()
         if not text:
@@ -150,7 +161,7 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
         if state["turns"] >= s.max_messages_per_conversation:
             raise HTTPException(429, "This demo conversation is full. Please start a new one.")
 
-        return StreamingResponse(stream_turn(sid, text, client_ip(request)), media_type="text/event-stream",
+        return StreamingResponse(stream_turn(sid, text, client_ip(request), key), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
     @app.get("/api/sessions/{sid}")
