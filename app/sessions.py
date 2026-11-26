@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import threading
 import time
@@ -17,6 +18,10 @@ def new_state(customer: str, engine: str) -> dict:
 
 class Busy(RuntimeError):
     """Another message of this conversation is still being processed."""
+
+
+def _visitor_key(visitor: str, day: str) -> str:
+    return f"relay:live:{day}:{hashlib.sha256(visitor.encode()).hexdigest()[:24]}"  # no raw addresses stored
 
 
 class MemorySessions:
@@ -50,6 +55,15 @@ class MemorySessions:
         with self._mutex:
             self._counts[bucket] = self._counts.get(bucket, 0) + 1
             return self._counts[bucket]
+
+    def day_hit(self, visitor: str, day: str) -> int:
+        key = _visitor_key(visitor, day)
+        with self._mutex:
+            self._counts[key] = self._counts.get(key, 0) + 1
+            return self._counts[key]
+
+    def day_count(self, visitor: str, day: str) -> int:
+        return self._counts.get(_visitor_key(visitor, day), 0)
 
     def ping(self) -> None:
         return None
@@ -86,6 +100,16 @@ class RedisSessions:
         pipe.incr(bucket)
         pipe.expire(bucket, 120)
         return pipe.execute()[0]
+
+    def day_hit(self, visitor: str, day: str) -> int:
+        key = _visitor_key(visitor, day)
+        pipe = self.r.pipeline()
+        pipe.incr(key)
+        pipe.expire(key, 2 * TTL)
+        return pipe.execute()[0]
+
+    def day_count(self, visitor: str, day: str) -> int:
+        return int(self.r.get(_visitor_key(visitor, day)) or 0)
 
     def ping(self) -> None:
         self.r.ping()

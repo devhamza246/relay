@@ -18,7 +18,7 @@ case "${1:-}" in
     docker run -d --rm --name "$NAME" --network relay_default -p 127.0.0.1:8826:8000 -v "$DIR:/data" \
       -e ANTHROPIC_API_KEY -e RELAY_DATABASE_URL -e RELAY_REDIS_URL=redis://redis:6379/1 -e RELAY_LLM_MODE=record \
       -e RELAY_CASSETTE=/data/cassette.jsonl -e RELAY_DAILY_SPEND_CAP_USD="${RELAY_BENCH_CAP:-0.60}" \
-      -e RELAY_RATE_LIMIT_PER_MIN=0 -e RELAY_RETENTION_HOURS=0 relay-app:latest >/dev/null
+      -e RELAY_RATE_LIMIT_PER_MIN=0 -e RELAY_VISITOR_LIVE_PER_DAY=0 -e RELAY_RETENTION_HOURS=0 relay-app:latest >/dev/null
     for _ in $(seq 60); do curl -sf localhost:8826/healthz >/dev/null && echo "bench API ready on 127.0.0.1:8826" && exit 0; sleep 1; done
     echo "bench API did not become healthy" >&2; docker logs "$NAME" 2>&1 | tail -20; exit 1 ;;
   stop) docker rm -f "$NAME" >/dev/null && echo stopped ;;

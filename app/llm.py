@@ -11,7 +11,7 @@ import re
 import threading
 import time
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
@@ -28,6 +28,14 @@ class LLMError(RuntimeError):
 
 class ReplayMiss(LLMError):
     """Recorded-answer mode and this exact request was never recorded: no network call, nothing spent."""
+
+
+class AllowanceExhausted(LLMError):
+    """A live call was needed but today's spend cap (scope "global") or the visitor's limit (scope "visitor") is used up."""
+
+    def __init__(self, scope: str):
+        super().__init__("the daily spend cap has been reached" if scope == "global" else "this visitor's daily limit has been reached")
+        self.scope = scope
 
 
 @dataclass
@@ -52,15 +60,37 @@ def cost_of(model: str, tokens_in: int, tokens_out: int) -> float:
     return 0.0
 
 
+def utc_day() -> date:
+    return datetime.now(timezone.utc).date()
+
+
+class LiveGate:
+    """One customer message's permission to call the live model: counted once per message, however many calls it makes."""
+
+    def __init__(self, sessions, visitor: str, per_day: int):
+        self.sessions, self.visitor, self.per_day = sessions, visitor, per_day
+        self._allowed: bool | None = None
+        self._lock = threading.Lock()  # triage and the drafted answer ask at the same time
+
+    def check(self) -> None:
+        if not self.visitor or self.per_day <= 0:
+            return
+        with self._lock:
+            if self._allowed is None:
+                self._allowed = self.sessions.day_hit(self.visitor, utc_day().isoformat()) <= self.per_day
+            if not self._allowed:
+                raise AllowanceExhausted("visitor")
+
+
 class Budget:
-    """Daily spend cap (UTC day), in memory."""
+    """Daily spend cap (UTC day), in memory. A cap of 0 allows no live call at all."""
 
     def __init__(self, cap_usd: float):
-        self.cap, self._day, self._spent, self._lock = cap_usd, date.today(), 0.0, threading.Lock()
+        self.cap, self._day, self._spent, self._lock = cap_usd, utc_day(), 0.0, threading.Lock()
 
     def _roll(self) -> None:
-        if date.today() != self._day:
-            self._day, self._spent = date.today(), 0.0
+        if utc_day() != self._day:
+            self._day, self._spent = utc_day(), 0.0
 
     def add(self, usd: float) -> None:
         with self._lock:
@@ -74,7 +104,7 @@ class Budget:
             return self._spent
 
     def exhausted(self) -> bool:
-        return self.cap > 0 and self.spent >= self.cap
+        return self.spent >= self.cap
 
 
 class Cassette:
@@ -144,6 +174,7 @@ class ModelEngine:
     def __init__(self, settings: Settings, cassette: Cassette, budget: Budget, replay_only: bool, client=None):
         self.s, self.cassette, self.budget, self.replay_only = settings, cassette, budget, replay_only
         self.name = "recorded" if replay_only else "live"
+        self.gate: LiveGate | None = None  # set on a per-message copy
         self._client = client
         if client is None and not replay_only and settings.anthropic_key:
             self._client = self._make_client()  # at startup, not during the first customer's message
@@ -161,11 +192,13 @@ class ModelEngine:
                 raise LLMError("ANTHROPIC_API_KEY is not set")
             self._client = self._make_client()
         if self.budget.exhausted():
-            raise LLMError("the daily spend cap has been reached")
+            raise AllowanceExhausted("global")
+        if self.gate:
+            self.gate.check()
         return self._client
 
     def _lookup(self, key: str) -> dict | None:
-        # live mode re-asks the API; replay and record serve the cassette
+        # live mode re-asks the API; replay, auto and record serve the cassette
         return self.cassette.entries.get(key) if self.s.llm_mode != "live" or self.replay_only else None
 
     def _finish(self, usage: Usage, key: str, text: str, record: bool = True) -> None:
@@ -238,7 +271,7 @@ def build_engines(settings: Settings) -> tuple[dict, Budget]:
     budget = Budget(settings.daily_spend_cap_usd)
     engines: dict = {"rules": RuleEngine()}
     names = settings.engines
-    if "recorded" in names or "live" in names:
+    if "recorded" in names or "live" in names:  # in auto mode the "live" engine serves recordings first
         name = names[0]
         engines[name] = ModelEngine(settings, Cassette(settings.cassette), budget, replay_only=name == "recorded")
     return engines, budget

@@ -59,10 +59,11 @@ services:
     environment:
       RELAY_DATABASE_URL: postgresql://relay_app:${RELAY_APP_DB_PASSWORD}@postgres:5432/relay
       RELAY_REDIS_URL: redis://redis:6379/0
-      # replay (default) and rules never call the API. "live" needs ANTHROPIC_API_KEY and spends money.
+      # replay (default) and rules never call the API. "auto" (recordings first) and "live" need ANTHROPIC_API_KEY and spend.
       RELAY_LLM_MODE: ${RELAY_LLM_MODE:-replay}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      RELAY_DAILY_SPEND_CAP_USD: ${RELAY_DAILY_SPEND_CAP_USD:-0.25}
+      RELAY_DAILY_SPEND_CAP_USD: ${RELAY_DAILY_SPEND_CAP_USD:-0.05}
+      RELAY_VISITOR_LIVE_PER_DAY: ${RELAY_VISITOR_LIVE_PER_DAY:-8}
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
       RELAY_SLACK_MAX_PER_HOUR: ${RELAY_SLACK_MAX_PER_HOUR:-20}
       RELAY_ADMIN_TOKEN: ${RELAY_ADMIN_TOKEN:-}

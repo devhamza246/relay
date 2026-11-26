@@ -4,7 +4,7 @@
   var NOTES = {
     recorded: "Recorded model answers: replies Claude produced earlier are replayed, so the demo never spends API credits. Free-typed knowledge questions that were not recorded say so. Escalation rules and tools work for any text.",
     rules: "Rule-based offline engine: no AI model. It quotes help center sentences and uses keyword rules, so it is weaker than the real model, but you can type anything.",
-    live: "Live model: what you type is sent to the Claude API. The demo has a small daily budget; once it is used up, knowledge questions cannot be answered until the next day (UTC)."
+    live: "Recorded answers are replayed for free. Anything new is sent to the Claude API, within a small daily allowance; when it is used up, the recorded examples still work."
   };
   function el(tag, text, cls) {
     var n = document.createElement(tag);
@@ -17,7 +17,20 @@
     var engine = $("engine").value;
     $("engine-note").textContent = NOTES[engine] || "";
     RelayWidget.reset({ customer: $("customer").value, engine: engine });
-    RelayWidget.subtitle({ recorded: "Recorded model answers", rules: "Rule-based offline demo", live: "Live model" }[engine] || "");
+    RelayWidget.subtitle({ recorded: "Recorded model answers", rules: "Rule-based offline demo", live: "Recorded first, then live" }[engine] || "");
+  }
+
+  function showAllowance(a) {
+    var box = $("allowance");
+    if (!a) { box.textContent = ""; return; }
+    var left = a.remaining_usd <= 0 || a.visitor_remaining === 0;
+    box.textContent = (left ? "Today's live allowance is used up; the recorded examples still work. " : "Live allowance left today: ") +
+      "$" + a.remaining_usd.toFixed(3) + " of $" + a.daily_usd.toFixed(2) + " for everyone" +
+      (a.visitor_remaining === null ? "" : " · " + a.visitor_remaining + " of " + a.visitor_per_day + " live messages for you") +
+      " · resets " + a.resets;
+  }
+  function refreshAllowance() {
+    fetch("api/status").then(function (r) { return r.json(); }).then(function (s) { showAllowance(s.live_allowance); }).catch(function () {});
   }
 
   function sequence(turns) {
@@ -26,13 +39,14 @@
 
   fetch("api/status").then(function (r) { return r.json(); }).then(function (status) {
     status.customers.forEach(function (c) { $("customer").appendChild(option(c.email, c.name + " (orders " + c.orders.join(", ") + ")")); });
-    var names = { recorded: "Recorded model answers", rules: "Rule-based (type anything)", live: "Live model" };
+    var names = { recorded: "Recorded model answers", rules: "Rule-based (type anything)", live: "Recorded first, then live" };
     status.engines.forEach(function (e) { $("engine").appendChild(option(e, names[e] || e)); });
     status.suggestions.forEach(function (s) {
       var b = el("button", s.label); b.type = "button"; b.title = s.turns.join(" / ");
       b.onclick = function () { if (RelayWidget.busy()) return; configure(); RelayWidget.open(); sequence(s.turns); };
       $("chips").appendChild(b);
     });
+    showAllowance(status.live_allowance);
     $("retention").textContent = status.retention_hours;
     $("meta").textContent = status.articles + " help articles · Slack: " + (status.slack === "webhook" ? "webhook connected" : "dry run (nothing is sent)");
     $("customer").onchange = configure; $("engine").onchange = configure; configure();
@@ -92,7 +106,7 @@
     });
   }
 
-  window.addEventListener("relay:done", function (e) { showDecision(e.detail.event); showHandoff(e.detail.session); });
+  window.addEventListener("relay:done", function (e) { showDecision(e.detail.event); showHandoff(e.detail.session); refreshAllowance(); });
   window.addEventListener("relay:reset", function () {
     $("handoff").className = "muted"; $("handoff").textContent = "No handoff in this conversation yet.";
     $("decision").className = "muted"; $("decision").textContent = "Send a message to see what the agent decides.";

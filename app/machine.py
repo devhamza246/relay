@@ -8,6 +8,7 @@ Conversation states: open, awaiting_order_id, offered_human, escalated (terminal
 """
 from __future__ import annotations
 
+import copy
 import queue
 import re
 import threading
@@ -18,7 +19,7 @@ from typing import Iterator
 from . import prompts, rules
 from .citations import SentenceSplitter, check_sentence
 from .config import Settings
-from .llm import LLMError, ReplayMiss, RuleEngine, Usage, format_transcript, template_summary
+from .llm import AllowanceExhausted, LiveGate, LLMError, ReplayMiss, RuleEngine, Usage, format_transcript, template_summary
 from .redact import redact
 from .retrieval import Retriever
 from .sessions import new_state
@@ -30,6 +31,12 @@ UNKNOWN = "I don't know the answer to that from our help center, so I won't gues
 FEEDBACK = "Sorry that didn't help. You can rephrase the question, or I can pass this to a human support agent. Which would you like?"
 NOT_RECORDED = ("This public demo replays recorded model answers and never calls the paid API, and that question was not recorded. "
                 "Try one of the suggested questions, or switch the engine to \"Rule-based\" to type anything.")
+ALLOWANCE_USED = {
+    "global": ("Today's live allowance for this demo is used up, so I can't answer new questions until tomorrow (UTC). "
+               "The recorded examples still work: try one of the suggested buttons."),
+    "visitor": ("You've used today's live allowance for this demo, so I can't answer new questions for you until tomorrow (UTC). "
+                "The recorded examples still work: try one of the suggested buttons."),
+}
 SMALLTALK_REPLY = "Hi, I'm Relay, the Fernwick Goods support assistant. Ask me about orders, returns, billing, your account or our products."
 THANKS_REPLY = "You're welcome. Is there anything else I can help with?"
 ASK_ORDER = "I can check that. What is the order number? It looks like FW-12345."
@@ -57,18 +64,18 @@ class Machine:
         self.sessions.save(sid, new_state(customer, engine))
         return sid
 
-    def handle(self, sid: str, text: str) -> Iterator[dict]:
+    def handle(self, sid: str, text: str, visitor: str = "") -> Iterator[dict]:
         with self.sessions.lock(sid):
             state = self.sessions.load(sid)
             if state is None:
                 raise KeyError(sid)
-            turn = _Turn(self, sid, state, redact(text.strip()))
+            turn = _Turn(self, sid, state, redact(text.strip()), visitor)
             yield from turn.run()
 
-    def run(self, sid: str, text: str) -> dict:
+    def run(self, sid: str, text: str, visitor: str = "") -> dict:
         """Non-streaming convenience for tests and evals: the final event, plus timings."""
         start, first, done = time.perf_counter(), None, {}
-        for event in self.handle(sid, text):
+        for event in self.handle(sid, text, visitor):
             if event["type"] == "token" and first is None:
                 first = (time.perf_counter() - start) * 1000
             if event["type"] == "done":
@@ -124,9 +131,12 @@ class _Speculation:
 
 
 class _Turn:
-    def __init__(self, machine: Machine, sid: str, state: dict, message: str):
+    def __init__(self, machine: Machine, sid: str, state: dict, message: str, visitor: str = ""):
         self.m, self.sid, self.state, self.message = machine, sid, state, message
         self.engine = machine.engines.get(state["engine"]) or machine.rules_engine
+        if hasattr(self.engine, "gate"):  # a per-message copy sharing the client, cassette and budget
+            self.engine = copy.copy(self.engine)
+            self.engine.gate = LiveGate(machine.sessions, visitor, machine.s.visitor_live_per_day)
         self.usage: list[Usage] = []
         self.notes: list[str] = []
         self.reply = ""
@@ -146,8 +156,12 @@ class _Turn:
             self.notes.append("A speculative draft answer was discarded.")
             self.draft = None
         self.state["turns"] += 1
+        engine = self.engine.name
+        called = any(u.input_tokens and not u.cached for u in self.usage)
+        if engine == "live" and not called and any(u.cached for u in self.usage):
+            engine = "recorded"  # everything in this reply came from the cassette
         data = {"outcome": outcome, "state": self.state["state"], "failed_answers": self.state["failed"],
-                "engine": self.engine.name, **self.meta, **extra}
+                "engine": engine, **self.meta, **extra}
         self.m.sessions.save(self.sid, self.state)
         self.m.store.set_state(self.sid, self.state["state"])
         self.m.store.add_message(self.sid, "assistant", self.reply, {
@@ -248,7 +262,9 @@ class _Turn:
             self.usage.append(usage)
             return {"intent": data["intent"], "sentiment": data["sentiment"], "urgency": data["urgency"], "source": usage.model}
         except (LLMError, KeyError, TypeError) as exc:
-            if not isinstance(exc, ReplayMiss):
+            if isinstance(exc, AllowanceExhausted):
+                self.notes.append("Live allowance used up: rule-based triage was used.")
+            elif not isinstance(exc, ReplayMiss):
                 self.notes.append("Model triage was unavailable; rule-based triage was used.")
             return {**rules.classify(self.message), "source": "rule-based"}
 
@@ -287,6 +303,12 @@ class _Turn:
             self.usage.extend(draft.usage)
             yield from self.say(NOT_RECORDED)
             yield from self.finish("not_recorded")
+            return
+        except AllowanceExhausted as exc:  # not the customer's failure: it does not count towards a handoff
+            self.usage.extend(draft.usage)
+            self.meta["allowance"] = exc.scope
+            yield from self.say(ALLOWANCE_USED[exc.scope])
+            yield from self.finish("allowance_used")
             return
         except LLMError as exc:
             self.notes.append(f"The answer model failed ({exc}).")

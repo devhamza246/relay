@@ -1,9 +1,11 @@
 import json
+from types import SimpleNamespace as NS
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.api import create_app
+from app.llm import Budget, Cassette, ModelEngine
 
 
 @pytest.fixture
@@ -54,3 +56,46 @@ def test_rate_limit(make_machine):
     client = TestClient(create_app(machine.s, machine))
     codes = [client.post("/api/sessions", json={}).status_code for _ in range(3)]
     assert codes == [201, 201, 429]
+
+
+class Fake:
+    """Stands in for the Anthropic client so the whole API path can be driven without a network."""
+
+    def __init__(self):
+        self.messages = self
+
+    def create(self, **kw):
+        keys = kw["output_config"]["format"]["schema"]["required"]
+        data = {"intent": "question", "sentiment": "neutral", "urgency": "low"} if "intent" in keys else dict.fromkeys(keys, "x")
+        return NS(content=[NS(type="text", text=json.dumps(data))], usage=NS(input_tokens=800, output_tokens=30))
+
+    def stream(self, **kw):
+        final = NS(usage=NS(input_tokens=900, output_tokens=40), stop_reason="end_turn")
+
+        class Stream:
+            text_stream = iter(["Express shipping costs $14.95 [1]."])
+            __enter__ = lambda self: self
+            __exit__ = lambda self, *a: False
+            get_final_message = lambda self: final
+
+        return Stream()
+
+
+@pytest.mark.parametrize("cap,per_day,scope", [(0.0, 8, "global"), (1.0, 1, "visitor")])
+def test_used_up_allowance_is_friendly_and_not_a_failed_answer(make_machine, tmp_path, cap, per_day, scope):
+    machine = make_machine(llm_mode="auto", anthropic_key="k", cassette=str(tmp_path / "c.jsonl"),
+                           daily_spend_cap_usd=cap, visitor_live_per_day=per_day)
+    machine.engines["live"] = ModelEngine(machine.s, Cassette(machine.s.cassette), Budget(cap), False, Fake())
+    client = TestClient(create_app(machine.s, machine))
+    sid = client.post("/api/sessions", json={}).json()["session_id"]
+
+    def ask():
+        return events(client.post(f"/api/sessions/{sid}/messages", json={"text": "what does express delivery cost"}))[-1]
+
+    if scope == "visitor":
+        assert ask()["outcome"] == "answered"
+    done = [ask(), ask(), ask()][-1]
+    assert done["outcome"] == "allowance_used" and done["allowance"] == scope
+    assert done["failed_answers"] == 0 and "used" in done["text"] and "Error" not in done["text"]
+    left = client.get("/api/status").json()["live_allowance"]
+    assert (left["remaining_usd"] == 0) if scope == "global" else (left["visitor_remaining"] == 0)

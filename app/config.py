@@ -23,14 +23,17 @@ class Settings:
     # rules  = deterministic rule-based stand-in only (no key, no spending)
     # replay = recorded real-model answers from the cassette; never calls the API (visitors can also pick "rules")
     # record = replay on a hit, call the API on a miss and append it to the cassette (spends money)
-    # live   = call the API (spends money, capped per day)
+    # auto   = replay on a hit; on a miss call the API within the daily cap and the per-visitor limit (never records)
+    # live   = always call the API (spends money, capped per day)
     llm_mode: str = field(default_factory=lambda: _env("RELAY_LLM_MODE", "rules"))
     anthropic_key: str = field(default_factory=lambda: _env("ANTHROPIC_API_KEY"))
     cassette: str = field(default_factory=lambda: _env("RELAY_CASSETTE", str(ROOT.parent / "eval" / "cassette.jsonl")))
     triage_model: str = field(default_factory=lambda: _env("RELAY_TRIAGE_MODEL", "claude-haiku-5-5"))
     answer_model: str = field(default_factory=lambda: _env("RELAY_ANSWER_MODEL", "claude-sonnet-5-5"))
     summary_model: str = field(default_factory=lambda: _env("RELAY_SUMMARY_MODEL", "claude-haiku-5-5"))
-    daily_spend_cap_usd: float = field(default_factory=lambda: float(_env("RELAY_DAILY_SPEND_CAP_USD", "0.25")))
+    daily_spend_cap_usd: float = field(default_factory=lambda: float(_env("RELAY_DAILY_SPEND_CAP_USD", "0.05")))
+    # Messages per visitor per UTC day that may call the live model. 0 = no per-visitor limit (benchmarks).
+    visitor_live_per_day: int = field(default_factory=lambda: int(_env("RELAY_VISITOR_LIVE_PER_DAY", "8")))
 
     embed_model: str = field(default_factory=lambda: _env("RELAY_EMBED_MODEL", "BAAI/bge-small-en-v1.5"))
     # Below this retrieval confidence the bot says it does not know. Both picked on eval/calibration.yaml
@@ -53,8 +56,8 @@ class Settings:
     @property
     def engines(self) -> list[str]:
         """Answer engines a conversation may use, default first."""
-        if self.llm_mode == "live" or self.llm_mode == "record":
+        if self.llm_mode in ("live", "record") or (self.llm_mode == "auto" and self.anthropic_key):
             return ["live", "rules"]
-        if self.llm_mode == "replay" and Path(self.cassette).is_file():
+        if self.llm_mode in ("replay", "auto") and Path(self.cassette).is_file():
             return ["recorded", "rules"]
         return ["rules"]

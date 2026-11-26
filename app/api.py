@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from . import __version__
 from .config import Settings
 from .embed import Embedder
-from .llm import build_engines
+from .llm import build_engines, utc_day
 from .machine import Machine
 from .retrieval import Retriever
 from .sessions import Busy, RedisSessions
@@ -80,13 +80,13 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
             raise HTTPException(404, "unknown or expired conversation")
         return state
 
-    def stream_turn(sid: str, text: str):
+    def stream_turn(sid: str, text: str, visitor: str):
         """The turn runs in its own thread, so a handoff still completes if the browser disconnects mid-reply."""
         events: queue.Queue = queue.Queue()
 
         def work() -> None:
             try:
-                for event in machine.handle(sid, text):
+                for event in machine.handle(sid, text, visitor):
                     events.put(event)
             except Busy:
                 events.put({"type": "error", "text": "Still answering your previous message. Please wait a moment."})
@@ -109,9 +109,20 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
             raise HTTPException(503, "a dependency is unavailable") from exc
         return {"status": "ok"}
 
+    def allowance(request: Request) -> dict | None:
+        """What is left of today's live budget, for the status line. None when no live calls are possible."""
+        budget = getattr(machine.engines.get("live"), "budget", None)
+        if budget is None:
+            return None
+        used = sessions.day_count(client_ip(request), utc_day().isoformat())
+        return {"daily_usd": budget.cap, "remaining_usd": round(max(0.0, budget.cap - budget.spent), 4),
+                "visitor_per_day": s.visitor_live_per_day,
+                "visitor_remaining": max(0, s.visitor_live_per_day - used) if s.visitor_live_per_day > 0 else None,
+                "resets": "00:00 UTC"}
+
     @app.get("/api/status")
-    def status() -> dict:
-        return {"version": __version__, "engines": s.engines, "slack": machine.slack.mode, "articles": store.article_count(),
+    def status(request: Request) -> dict:
+        return {"mode": s.llm_mode, "live_allowance": allowance(request), "version": __version__, "engines": s.engines, "slack": machine.slack.mode, "articles": store.article_count(),
                 "customers": store.customers(), "suggestions": SUGGESTIONS, "retention_hours": s.retention_hours,
                 "models": {"triage": s.triage_model, "answer": s.answer_model, "summary": s.summary_model}}
 
@@ -139,7 +150,7 @@ def create_app(settings: Settings | None = None, machine: Machine | None = None)
         if state["turns"] >= s.max_messages_per_conversation:
             raise HTTPException(429, "This demo conversation is full. Please start a new one.")
 
-        return StreamingResponse(stream_turn(sid, text), media_type="text/event-stream",
+        return StreamingResponse(stream_turn(sid, text, client_ip(request)), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
     @app.get("/api/sessions/{sid}")
