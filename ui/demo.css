@@ -11,7 +11,7 @@ main{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;paddi
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
 .wide{grid-column:1/-1}
 .row{display:flex;flex-wrap:wrap;gap:14px}
-label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px;min-width:0;max-width:100%}
 select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .chips button{font:inherit;font-size:14px;border:1px solid var(--brand);color:var(--brand);background:transparent;border-radius:999px;padding:6px 14px;cursor:pointer}
@@ -28,4 +28,4 @@ dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
 pre{overflow:auto;max-height:320px;background:var(--bg);border-radius:8px;padding:10px;font-size:12px}
 footer{padding-bottom:110px;font-size:13px;color:var(--muted)}
 a{color:var(--brand)}
-@media (max-width:760px){main{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}
+@media (max-width:760px){main{grid-template-columns:minmax(0,1fr)}.row label,select{width:100%}.fields{grid-template-columns:1fr}}
