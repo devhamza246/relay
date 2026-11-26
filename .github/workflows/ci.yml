@@ -38,6 +38,7 @@ jobs:
           path: .fastembed
           key: fastembed-bge-small-en-v1.5
       - run: pip install -e ".[dev]" "git+https://github.com/devhamza246/gauge.git"
+      - run: python -m playwright install --with-deps chromium
       - run: pytest -q
 
   # The 50 tickets and the safety suite through the whole pipeline (rule-based engine), gated against a committed baseline.

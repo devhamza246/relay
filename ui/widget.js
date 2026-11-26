@@ -5,6 +5,8 @@
   var script = document.currentScript;
   var API = ((script && script.dataset.api) || "").replace(/\/$/, "");
   var session = null, busy = false, options = {};
+  var SLOW_MS = 5000, GIVE_UP_MS = 45000;
+  var current = null;  // the request in flight, so "New chat" can cancel it
   var ownKey = "";  // the visitor's own API key: this variable only, never written to browser storage
 
   var host = document.createElement("div");
@@ -34,6 +36,15 @@
     "input{flex:1;min-width:0;border:1px solid #c5d0cb;border-radius:8px;padding:10px;font-size:14px;color:#17211d;background:#fff}" +
     "form button{background:#1f5c4a;color:#fff;border:0;border-radius:8px;padding:0 16px;font-weight:600;cursor:pointer}" +
     "form button:disabled{opacity:.5;cursor:default}" +
+    "form button{min-width:70px;display:inline-flex;align-items:center;justify-content:center}" +
+    ".spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:turn .8s linear infinite;vertical-align:-2px}" +
+    ".typing{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}.typing i{width:6px;height:6px;border-radius:50%;background:#6c807a;animation:bob 1.1s ease-in-out infinite}" +
+    ".typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}" +
+    ".pending{display:block;margin-top:2px}.slow{display:block;margin-top:6px;font-size:12px;color:#7a5200}" +
+    ".bot.error{border-color:#e2b4ac;background:#fdf1ef}" +
+    ".retry{display:block;margin-top:8px;background:#1f5c4a;color:#fff;border:0;border-radius:6px;padding:5px 12px;font-size:13px;cursor:pointer}" +
+    "@keyframes turn{to{transform:rotate(360deg)}}@keyframes bob{0%,80%,100%{opacity:.35;transform:none}40%{opacity:1;transform:translateY(-3px)}}" +
+    "@media (prefers-reduced-motion:reduce){.spin,.typing i{animation:none}}" +
     "</style>" +
     '<button class="launch" type="button">Chat with support</button>' +
     '<section class="panel" role="dialog" aria-label="Support chat">' +
@@ -56,14 +67,27 @@
   function close() { panel.classList.remove("open"); $(".launch").style.display = ""; }
   function greet() { log.appendChild(el("div", "msg bot", "Hi, I'm Relay, the Fernwick Goods support assistant. I answer from our help center, check your orders, and pass you to a person when I should.")); }
   function reset(next) {
+    if (current) current.cancel();
     options = next || options; session = null; log.textContent = ""; greet();
     window.dispatchEvent(new CustomEvent("relay:reset"));
   }
 
-  function request(path, body, extra) {
+  function setBusy(value) {
+    busy = value; send.disabled = value; send.setAttribute("aria-busy", String(value));
+    send.textContent = ""; send.appendChild(value ? el("span", "spin") : document.createTextNode("Send"));
+    send.setAttribute("aria-label", value ? "Sending" : "Send");
+    window.dispatchEvent(new CustomEvent("relay:busy", { detail: { busy: value } }));
+  }
+  function typing() {
+    var dots = el("span", "typing"); dots.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) dots.appendChild(el("i"));
+    return dots;
+  }
+
+  function request(path, body, extra, signal) {
     var headers = { "Content-Type": "application/json" };
     if (extra) Object.keys(extra).forEach(function (k) { headers[k] = extra[k]; });
-    return fetch(API + path, { method: "POST", headers: headers, body: JSON.stringify(body) })
+    return fetch(API + path, { method: "POST", headers: headers, body: JSON.stringify(body), signal: signal })
       .then(function (r) {
         if (r.ok) return r;
         return r.json().catch(function () { return {}; }).then(function (d) {
@@ -72,20 +96,24 @@
         });
       });
   }
-  function ensureSession() {
+  function ensureSession(signal) {
     if (session) return Promise.resolve(session);
-    return request("/api/sessions", { customer: options.customer || "", engine: options.engine || "" })
+    return request("/api/sessions", { customer: options.customer || "", engine: options.engine || "" }, null, signal)
       .then(function (r) { return r.json(); }).then(function (d) { session = d.session_id; return session; });
   }
 
   function showSource(box, citation) {
     var old = box.querySelector(".excerpt");
     if (old) { var same = old.dataset.n === String(citation.n); old.remove(); if (same) return; }
-    var excerpt = el("div", "excerpt", "Loading..."); excerpt.dataset.n = citation.n; box.appendChild(excerpt); scroll();
+    var excerpt = el("div", "excerpt"); excerpt.dataset.n = citation.n;
+    excerpt.appendChild(el("span", "spin")); excerpt.appendChild(document.createTextNode(" Loading the source..."));
+    box.appendChild(excerpt); scroll();
     if (citation.kind === "article") {
-      fetch(API + "/api/articles/" + encodeURIComponent(citation.slug)).then(function (r) { return r.json(); })
+      var slow = setTimeout(function () { excerpt.appendChild(el("span", "slow", "This is taking longer than usual.")); }, SLOW_MS);
+      fetch(API + "/api/articles/" + encodeURIComponent(citation.slug))
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).finally(function () { clearTimeout(slow); })
         .then(function (a) { excerpt.textContent = a.title + "\n" + a.body; scroll(); })
-        .catch(function () { excerpt.textContent = "Could not load the article."; });
+        .catch(function () { excerpt.textContent = "Could not load the article. Click the source again to retry."; excerpt.dataset.n = ""; });
     } else if (citation.kind === "order" && citation.record) {
       var o = citation.record;
       excerpt.textContent = o.id + " | " + o.status + " | placed " + o.placed + "\n" + o.items.join(", ") + " | $" + o.total + "\n" + o.detail;
@@ -141,36 +169,59 @@
   function submit(text) {
     text = (text || "").trim();
     if (!text || busy) return Promise.resolve();
-    open(); busy = true; send.disabled = true;
-    log.appendChild(el("div", "msg me", text));
-    var bubble = el("div", "msg bot"), status = el("span", "status", "Sending...");
-    bubble.appendChild(status); log.appendChild(bubble); scroll();
-    var started = performance.now(), first = null, reply = "", finished = false;
-    return ensureSession()
+    open(); setBusy(true);
+    var mine = el("div", "msg me", text); log.appendChild(mine);
+    var bubble = el("div", "msg bot"), answer = el("span"), pending = el("span", "pending"), status = el("span", "status", "Sending...");
+    pending.setAttribute("role", "status"); pending.appendChild(typing()); pending.appendChild(status);
+    bubble.appendChild(answer); bubble.appendChild(pending); log.appendChild(bubble); scroll();
+    var started = performance.now(), first = null, reply = "", finished = false, cancelled = false, timedOut = false;
+    var abort = new AbortController();
+    var slow = setTimeout(function () {
+      pending.appendChild(el("span", "slow", "This is taking longer than usual. Still working...")); scroll();
+    }, SLOW_MS);
+    var giveUp = setTimeout(function () { timedOut = true; abort.abort(); }, GIVE_UP_MS);
+    function settle() { clearTimeout(slow); clearTimeout(giveUp); current = null; setBusy(false); }
+    current = { cancel: function () { cancelled = true; abort.abort(); settle(); } };
+
+    function fail(message, retryable) {
+      bubble.textContent = message; bubble.classList.add("error"); bubble.setAttribute("role", "alert");
+      if (retryable) {
+        var again = el("button", "retry", "Try again"); again.type = "button";
+        again.onclick = function () { if (busy) return; mine.remove(); bubble.remove(); submit(text); };
+        bubble.appendChild(again);
+      }
+      window.dispatchEvent(new CustomEvent("relay:failed"));
+    }
+
+    return ensureSession(abort.signal)
       .then(function (sid) {
-        return request("/api/sessions/" + sid + "/messages", { text: text }, ownKey ? { "X-Anthropic-Key": ownKey } : null);
+        return request("/api/sessions/" + sid + "/messages", { text: text }, ownKey ? { "X-Anthropic-Key": ownKey } : null, abort.signal);
       })
       .then(function (response) {
         return readStream(response, function (event) {
+          if (cancelled) return;
           if (event.type === "status" && !reply) status.textContent = event.text + "...";
           if (event.type === "token") {
-            if (first === null) first = performance.now() - started;
-            reply += event.text; bubble.textContent = reply; scroll();
+            if (first === null) { first = performance.now() - started; status.textContent = ""; }
+            reply += event.text; answer.textContent = reply; scroll();
           }
           if (event.type === "done") {
-            finished = true; render(bubble, event); scroll();
+            finished = true; clearTimeout(slow); render(bubble, event); scroll();
             event.browser = { first_token_ms: first, total_ms: performance.now() - started };
             window.dispatchEvent(new CustomEvent("relay:done", { detail: { session: session, event: event } }));
           }
-          if (event.type === "error") { finished = true; bubble.textContent = event.text; }
+          if (event.type === "error") { finished = true; fail(event.text, true); }
         });
       })
-      .then(function () { if (!finished) bubble.textContent = "The reply was interrupted. Please try again."; })
+      .then(function () { if (!finished && !cancelled) fail("The reply was interrupted.", true); })
       .catch(function (error) {
+        if (cancelled || finished) return;
         if (error.status === 404) session = null;
-        bubble.textContent = error.status ? error.message : "I can't reach support right now. Please try again.";
+        if (timedOut) fail("The reply took too long, so I stopped waiting.", true);
+        else if (error.status) fail(error.message, error.status !== 400 && error.status !== 422);
+        else fail("I can't reach support right now. Check your connection.", true);
       })
-      .then(function () { busy = false; send.disabled = false; scroll(); });
+      .then(function () { if (!cancelled) { settle(); scroll(); } });
   }
 
   $(".launch").onclick = open;
@@ -187,6 +238,8 @@
     configure: function (next) { options = next; },
     setKey: function (key) { ownKey = (key || "").trim(); },
     busy: function () { return busy; },
+    isOpen: function () { return panel.classList.contains("open"); },
+    element: function (name) { return name === "panel" ? panel : $(".launch"); },
     subtitle: function (text) { $("header small").textContent = text; }
   };
 })();

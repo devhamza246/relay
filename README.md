@@ -209,6 +209,7 @@ Embed the widget elsewhere with `<script src="https://your-host/widget.js" data-
 docker run -d --rm --name relay-test-pg -e POSTGRES_PASSWORD=testadmin -p 127.0.0.1:55434:5432 \
   --tmpfs /var/lib/postgresql/data pgvector/pgvector:pg16
 pip install -e ".[dev]" "git+https://github.com/devhamza246/gauge.git"
+python -m playwright install chromium   # for the browser tests in tests/test_ui.py
 pytest -q
 RELAY_ADMIN_DATABASE_URL=postgresql://postgres:testadmin@127.0.0.1:55434/postgres RELAY_APP_DB_PASSWORD=dev python -m app.bootstrap
 export RELAY_DATABASE_URL=postgresql://relay_app:dev@127.0.0.1:55434/postgres

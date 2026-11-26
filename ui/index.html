@@ -9,12 +9,15 @@
 </head>
 <body>
   <header class="top">
-    <h1>Relay</h1>
+    <div class="title-row"><h1>Relay</h1><button type="button" id="tour-button" class="tour-button">Take the tour</button></div>
     <p>A support agent that answers from a help center <strong>with citations</strong>, and hands off to a person <strong>with full context</strong> when it should not answer.</p>
     <p class="notice">Demo. Fernwick Goods, its help center, customers and orders are fictional; the order API is a mock. Conversations are deleted after <span id="retention">24</span> hours. Do not enter real personal data.</p>
   </header>
 
   <main>
+    <div id="page-loading" class="card wide"><p class="wait" role="status"><span class="spin"></span><span>Loading the demo…</span></p></div>
+    <noscript><p class="card wide">This demo needs JavaScript.</p></noscript>
+
     <section class="card wide" aria-labelledby="what">
       <h2 id="what">What is this?</h2>
       <p>Relay is a customer support agent for an online store. It answers routine questions from the store's help center, checks the signed-in customer's orders, opens tickets, and passes the conversation to a person when it should not handle it alone.</p>
@@ -31,13 +34,15 @@
 
     <section class="card" aria-labelledby="try">
       <h2 id="try">1. Try it</h2>
-      <div class="row">
-        <label>Signed in as <select id="customer"></select></label>
-        <label>Engine <select id="engine"></select></label>
+      <div id="limits">
+        <div class="row">
+          <label>Signed in as <select id="customer" disabled></select></label>
+          <label>Engine <select id="engine" disabled></select></label>
+        </div>
+        <p id="engine-note" class="muted"></p>
+        <div id="allowance" class="muted" role="status"></div>
       </div>
-      <p id="engine-note" class="muted"></p>
-      <p id="allowance" class="muted" role="status"></p>
-      <div id="chips" class="chips"></div>
+      <div id="chips" class="chips"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
       <p class="muted">Each button starts a new chat and sends that message. The chat opens at the bottom right; you can also type your own.</p>
       <details id="key-box">
         <summary>Use your own Anthropic key (optional)</summary>
@@ -52,6 +57,7 @@
 
     <section class="card" aria-labelledby="inside">
       <h2 id="inside">2. What the agent decided</h2>
+      <p id="state-badge" class="state bot" role="status">The bot is handling this conversation</p>
       <div id="decision" class="muted">Send a message to see triage, retrieval, tools and timing for the latest turn.</div>
     </section>
 
@@ -68,5 +74,6 @@
 
   <script src="widget.js"></script>
   <script src="demo.js"></script>
+  <script src="tour.js"></script>
 </body>
 </html>

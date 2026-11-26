@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  var SLOW_MS = 5000, GIVE_UP_MS = 20000;
   var $ = function (id) { return document.getElementById(id); };
   var NOTES = {
     recorded: "Recorded model answers: replies Claude produced earlier are replayed, so the demo never spends API credits. Free-typed knowledge questions that were not recorded say so. Escalation rules and tools work for any text.",
@@ -13,6 +14,29 @@
     return n;
   }
   function option(value, label) { var o = el("option", label); o.value = value; return o; }
+
+  function getJson(url) {
+    var abort = new AbortController(), timer = setTimeout(function () { abort.abort(); }, GIVE_UP_MS);
+    return fetch(url, { signal: abort.signal }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).finally(function () { clearTimeout(timer); });
+  }
+
+  /* A spinner with a label inside `box`, plus a note if the wait passes SLOW_MS. Returns a function that stops it. */
+  function waiting(box, label) {
+    box.textContent = ""; box.classList.remove("muted");
+    var line = el("p", undefined, "wait"); line.setAttribute("role", "status");
+    line.appendChild(el("span", undefined, "spin")); var text = el("span", label); line.appendChild(text); box.appendChild(line);
+    var timer = setTimeout(function () { text.textContent = label + " This is taking longer than usual."; }, SLOW_MS);
+    return function () { clearTimeout(timer); };
+  }
+  function problem(box, message, retry) {
+    box.textContent = ""; box.classList.remove("muted");
+    var line = el("p", message, "problem"); line.setAttribute("role", "alert"); box.appendChild(line);
+    if (retry) { var b = el("button", "Try again", "retry"); b.type = "button"; b.onclick = retry; box.appendChild(b); }
+  }
+
   function configure() {
     var engine = $("engine").value;
     $("engine-note").textContent = NOTES[engine] || "";
@@ -24,6 +48,7 @@
   function showAllowance(a) {
     var box = $("allowance");
     lastAllowance = a;
+    box.classList.add("muted");
     if (usingKey) { box.textContent = "Using your key: new questions are billed to your Anthropic account, not this demo's allowance."; return; }
     if (!a) { box.textContent = ""; return; }
     var left = a.remaining_usd <= 0 || a.visitor_remaining === 0;
@@ -33,7 +58,9 @@
       " · resets " + a.resets;
   }
   function refreshAllowance() {
-    fetch("api/status").then(function (r) { return r.json(); }).then(function (s) { showAllowance(s.live_allowance); }).catch(function () {});
+    var stop = waiting($("allowance"), "Updating the allowance…");
+    getJson("api/status").then(function (s) { stop(); showAllowance(s.live_allowance); })
+      .catch(function () { stop(); $("allowance").textContent = "Could not refresh the allowance."; });
   }
 
   function keyChanged() {
@@ -49,17 +76,28 @@
   $("own-key").value = "";
   $("forget-key").onclick = function () { $("own-key").value = ""; keyChanged(); };
 
+  function setBusy(busy) {
+    Array.prototype.forEach.call(document.querySelectorAll("#chips button, #customer, #engine"), function (n) { n.disabled = busy; });
+    if (!busy) Array.prototype.forEach.call(document.querySelectorAll("#chips button.loading"), function (b) {
+      b.classList.remove("loading"); b.removeAttribute("aria-busy");
+    });
+  }
+
   function sequence(turns) {
     return turns.reduce(function (p, t) { return p.then(function () { return RelayWidget.send(t); }); }, Promise.resolve());
   }
 
-  fetch("api/status").then(function (r) { return r.json(); }).then(function (status) {
+  function ready(status) {
+    $("customer").textContent = ""; $("engine").textContent = ""; $("chips").textContent = "";
     status.customers.forEach(function (c) { $("customer").appendChild(option(c.email, c.name + " (orders " + c.orders.join(", ") + ")")); });
     var names = { recorded: "Recorded model answers", rules: "Rule-based (type anything)", live: "Recorded first, then live" };
     status.engines.forEach(function (e) { $("engine").appendChild(option(e, names[e] || e)); });
     status.suggestions.forEach(function (s) {
       var b = el("button", s.label); b.type = "button"; b.title = s.turns.join(" / ");
-      b.onclick = function () { if (RelayWidget.busy()) return; configure(); RelayWidget.open(); sequence(s.turns); };
+      b.onclick = function () {
+        if (RelayWidget.busy()) return;
+        configure(); b.classList.add("loading"); b.setAttribute("aria-busy", "true"); RelayWidget.open(); sequence(s.turns);
+      };
       $("chips").appendChild(b);
     });
     showAllowance(status.live_allowance);
@@ -68,13 +106,33 @@
     $("slack-mode").textContent = status.slack === "webhook" ? "It is also posted to the connected Slack channel." :
       "On this demo the Slack alert is simulated: you see the exact message, and nothing is sent.";
     $("meta").textContent = status.articles + " help articles · Slack: " + (status.slack === "webhook" ? "webhook connected" : "dry run (nothing is sent)");
-    $("customer").onchange = configure; $("engine").onchange = configure; configure();
-  }).catch(function () { $("meta").textContent = "The API is unavailable."; });
+    $("customer").onchange = configure; $("engine").onchange = configure; configure(); setBusy(false);
+  }
+
+  function boot() {
+    var box = $("page-loading");
+    box.hidden = false; document.body.dataset.state = "loading";
+    var stop = waiting(box, "Loading the demo…");
+    getJson("api/status").then(function (status) {
+      stop(); ready(status); box.hidden = true; document.body.dataset.state = "ready";
+      window.dispatchEvent(new CustomEvent("relay:ready"));
+    }).catch(function () {
+      stop(); document.body.dataset.state = "failed";
+      problem(box, "The demo could not reach its server, so the buttons and chat are not available yet.", boot);
+    });
+  }
 
   function row(list, key, value) { if (value === undefined || value === null || value === "") return; list.appendChild(el("dt", key)); list.appendChild(el("dd", String(value))); }
 
+  function badge(kind, text) { var b = $("state-badge"); b.className = "state " + kind; b.textContent = text; }
+  function showState(done) {
+    if (done.state === "escalated") badge("human", "With a human · ticket " + (done.ticket || ""));
+    else if (done.state === "offered_human") badge("offered", "Bot offered a human · reply “yes” to hand off");
+    else badge("bot", "The bot is handling this conversation");
+  }
+
   function showDecision(done) {
-    var box = $("decision"), list = el("dl"); box.textContent = ""; box.className = "";
+    var box = $("decision"), list = el("dl"); box.textContent = ""; box.classList.remove("muted");
     var t = done.triage;
     if (t) row(list, "Triage", t.intent + " · " + t.sentiment + " · urgency " + t.urgency + " (" + t.source + ")");
     row(list, "Escalation signals", (done.signals || []).join(", ") || "none");
@@ -111,9 +169,14 @@
     });
     return box;
   }
+
+  var view = 0;  // bumped on every new chat or message, so a late response cannot overwrite a newer view
   function showHandoff(session) {
-    fetch("api/sessions/" + encodeURIComponent(session)).then(function (r) { return r.json(); }).then(function (data) {
-      var box = $("handoff"); box.textContent = ""; box.className = "";
+    var mine = ++view, box = $("handoff"), stop = waiting(box, "Loading the ticket…");
+    getJson("api/sessions/" + encodeURIComponent(session)).then(function (data) {
+      stop();
+      if (mine !== view) return;
+      box.textContent = ""; box.classList.remove("muted");
       if (!data.tickets.length) { box.className = "muted"; box.textContent = "No ticket in this conversation yet."; return; }
       data.tickets.forEach(function (t) { box.appendChild(el("p", t.code + " · " + t.kind + " · priority " + t.priority + " · " + t.status)); });
       data.handoffs.forEach(function (h) {
@@ -122,12 +185,30 @@
         box.appendChild(slackMessage(h.payload));
         var details = el("details"); details.appendChild(el("summary", "Block Kit JSON")); details.appendChild(el("pre", JSON.stringify(h.payload, null, 2))); box.appendChild(details);
       });
+    }).catch(function () {
+      stop();
+      if (mine === view) problem(box, "Could not load the ticket for this conversation.", function () { showHandoff(session); });
     });
   }
 
-  window.addEventListener("relay:done", function (e) { showDecision(e.detail.event); showHandoff(e.detail.session); refreshAllowance(); });
+  var stopDecision = null;
+  function clearDecisionWait() { if (stopDecision) { stopDecision(); stopDecision = null; } }
+  window.addEventListener("relay:busy", function (e) {
+    setBusy(e.detail.busy);
+    if (e.detail.busy) { clearDecisionWait(); stopDecision = waiting($("decision"), "Waiting for the agent…"); }
+  });
+  window.addEventListener("relay:done", function (e) {
+    clearDecisionWait(); showDecision(e.detail.event); showState(e.detail.event); showHandoff(e.detail.session); refreshAllowance();
+  });
+  window.addEventListener("relay:failed", function () {
+    clearDecisionWait(); problem($("decision"), "That message did not go through. Use “Try again” in the chat.");
+  });
   window.addEventListener("relay:reset", function () {
+    view++; clearDecisionWait(); badge("bot", "The bot is handling this conversation");
     $("handoff").className = "muted"; $("handoff").textContent = "No handoff in this conversation yet.";
     $("decision").className = "muted"; $("decision").textContent = "Send a message to see what the agent decides.";
   });
+
+  // Wait for the other scripts (the tour listens for relay:ready) before loading.
+  if (document.readyState === "complete") boot(); else window.addEventListener("load", boot);
 })();
