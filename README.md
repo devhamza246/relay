@@ -150,15 +150,22 @@ Known gaps in the guarantees:
 
 ## The public demo
 
-The public deployment holds **no API key** and cannot spend money.
+The public deployment calls the **real model**, with a budget of **$0.05 per day** (about 20 answered questions).
 
 | Engine | What it does |
 |---|---|
-| Recorded model answers (default) | Replays the real model's responses from [`eval/cassette.jsonl`](eval/cassette.jsonl). Suggested buttons are recorded. A free-typed knowledge question says it was not recorded. Tools and keyword escalation work on any text; triage for unrecorded text falls back to the rules. |
+| Live model (default) | Claude triage, answers and handoff summaries for any text. Messages are sent to the Anthropic API. |
 | Rule-based | No model. Type anything; expect the weaknesses listed above. |
 
-Replaying the cassette reproduces the live run's scores exactly (CI gates on this). Replay timings say nothing about model
-latency. The demo shows the retention period, uses fictional identities and asks visitors not to enter personal data.
+When the day's budget is used up, triage falls back to the keyword rules and a knowledge question gets "I couldn't produce
+an answer" with an offer of a human; a second one triggers a handoff. Escalation is much weaker in that state (see the
+holdout). The budget is checked before each call and held in memory, so a restart resets it and simultaneous requests can
+overshoot it slightly. The latency and score tables above come from the benchmark runs, not from public traffic.
+
+The compose default is `replay`, which needs no key and cannot spend: it replays the real model's responses from
+[`eval/cassette.jsonl`](eval/cassette.jsonl) and says so when a question was not recorded. Replaying reproduces the
+benchmark run's scores exactly, and CI gates on this. The demo shows the retention period, uses fictional identities and
+asks visitors not to enter personal data.
 
 ## Run it
 

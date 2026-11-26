@@ -4,7 +4,7 @@
   var NOTES = {
     recorded: "Recorded model answers: replies Claude produced earlier are replayed, so the demo never spends API credits. Free-typed knowledge questions that were not recorded say so. Escalation rules and tools work for any text.",
     rules: "Rule-based offline engine: no AI model. It quotes help center sentences and uses keyword rules, so it is weaker than the real model, but you can type anything.",
-    live: "Live model: every message calls the Claude API."
+    live: "Live model: what you type is sent to the Claude API. The demo has a small daily budget; once it is used up, knowledge questions cannot be answered until the next day (UTC)."
   };
   function el(tag, text, cls) {
     var n = document.createElement(tag);
