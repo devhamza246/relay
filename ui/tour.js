@@ -3,9 +3,10 @@
   "use strict";
   var SEEN = "relayTourSeen";
   var byId = function (id) { return function () { return document.getElementById(id); }; };
+  var cardOf = function (headingId) { return function () { var h = document.getElementById(headingId); return h && h.closest("section"); }; };
 
   var STEPS = [
-    { target: byId("what"), title: "A support agent that knows when to stop",
+    { target: cardOf("what"), title: "A support agent that knows when to stop",
       text: "Relay answers routine questions for a fictional store, and passes the conversation to a person when it should not handle it alone." },
     { target: byId("chips"), title: "Suggested prompts",
       text: "Each button starts a new chat and sends a ready-made message. Try “Billing dispute” to see a handoff." },
@@ -14,9 +15,9 @@
       enter: function () { var was = RelayWidget.isOpen(); RelayWidget.open(); return function () { if (!was) RelayWidget.close(); }; } },
     { target: byId("state-badge"), title: "Escalation indicator",
       text: "Shows who has the conversation: the bot, the bot offering a human, or a human with a ticket number." },
-    { target: byId("inside"), title: "Why the agent did that",
+    { target: cardOf("inside"), title: "Why the agent did that",
       text: "After each message you see how it was classified, which escalation signals fired, what was retrieved and how long it took." },
-    { target: byId("agent"), title: "The human agent's view",
+    { target: cardOf("agent"), title: "The human agent's view",
       text: "On a handoff the ticket appears here with the Slack message: summary, suspected intent and transcript, so nobody has to ask again." },
     { target: byId("limits"), title: "Engine and live allowance",
       text: "Pick who is signed in and which engine answers. This line shows how much of today's small live-model allowance is left." },

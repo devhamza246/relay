@@ -180,6 +180,19 @@ def test_blocked_storage_does_not_break_the_page(open_page):
     expect(page.get_by_role("button", name="Billing dispute")).to_be_enabled()
 
 
+def test_panel_steps_highlight_the_whole_panel_not_just_its_heading(open_page):
+    page = open_page(tour_seen=False)
+    for step in range(1, 7):
+        heading = {1: "what", 5: "inside", 6: "agent"}.get(step)
+        if heading:
+            page.wait_for_timeout(350)  # the highlight transition
+            panel = page.locator(f"section:has(> h2#{heading})").bounding_box()
+            spot = page.locator(".tour-spot").bounding_box()
+            visible = min(panel["height"], 800 - max(panel["y"], 0))
+            assert spot["height"] >= visible and spot["width"] >= panel["width"], f"step {step}"
+        page.locator(".tour-next").click()
+
+
 def test_reduced_motion_stops_the_animations(open_page):
     page = open_page(tour_seen=False)
     page.emulate_media(reduced_motion="reduce")
