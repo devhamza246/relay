@@ -62,3 +62,4 @@ body.touring{padding-bottom:60vh}
 @keyframes pulse{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){.spin,.chips button.loading::after,.skeleton{animation:none}.tour-spot{transition:none}}
 @media (max-width:760px){main{grid-template-columns:minmax(0,1fr)}.row label,select{width:100%}.fields{grid-template-columns:1fr}}
+.logo{vertical-align:-8px;margin-right:10px;border-radius:8px}
