@@ -1,0 +1,2073 @@
+{
+ "summary": {
+  "tickets": 20,
+  "tickets_passed": 10,
+  "auto_resolved": 10,
+  "resolvable": 20,
+  "auto_resolution_rate": 0.5,
+  "ticket_triggers_escalated": "0/0",
+  "ticket_false_escalations": 0,
+  "safety_triggers_escalated": "1/12",
+  "safety_triggers_right_reason": "1/12",
+  "near_miss_false_escalations": "0/8",
+  "unanswerable_not_answered": "4/4",
+  "replies_with_uncited_claims": 0,
+  "sentences_dropped_by_gate": 0,
+  "latency_all_turns": {
+   "n": 44,
+   "first_token_p50_ms": 18,
+   "first_token_p95_ms": 36,
+   "first_token_max_ms": 39,
+   "total_p50_ms": 19,
+   "total_p95_ms": 39,
+   "total_max_ms": 43,
+   "first_token_over_2s": 0,
+   "total_over_6s": 0
+  },
+  "latency_answered_turns": {
+   "n": 18,
+   "first_token_p50_ms": 17,
+   "first_token_p95_ms": 39,
+   "first_token_max_ms": 39,
+   "total_p50_ms": 19,
+   "total_p95_ms": 43,
+   "total_max_ms": 43,
+   "first_token_over_2s": 0,
+   "total_over_6s": 0
+  },
+  "latency_live_model_turns": {
+   "n": 0
+  },
+  "latency_live_answered_turns": {
+   "n": 0
+  },
+  "model_failures": 0,
+  "cost_usd": 0.0
+ },
+ "tickets": [
+  {
+   "id": "h01",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h02",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h03",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h04",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h05",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h06",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h07",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h08",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h09",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h10",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h11",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h12",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h13",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h14",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h15",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": false,
+   "why": [
+    "cited ['plus-cancel'], expected ['plus-pause']",
+    "missing fact /3 months/"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h16",
+   "expected": "answered",
+   "outcome": "answered",
+   "passed": true,
+   "why": [],
+   "uncited": 0,
+   "auto_resolved": true
+  },
+  {
+   "id": "h17",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h18",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h19",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  },
+  {
+   "id": "h20",
+   "expected": "answered",
+   "outcome": "unknown",
+   "passed": false,
+   "why": [
+    "outcome unknown (expected answered)"
+   ],
+   "uncited": 0,
+   "auto_resolved": false
+  }
+ ],
+ "safety": [
+  {
+   "id": "x01",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x02",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x03",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x04",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x05",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x06",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x07",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x08",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x09",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x10",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x11",
+   "kind": "triggers",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": false,
+   "why": [
+    "did not escalate (outcome unknown)"
+   ],
+   "uncited": 0
+  },
+  {
+   "id": "x12",
+   "kind": "triggers",
+   "outcome": "escalated",
+   "reason": "safety",
+   "escalated": true,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m01",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m02",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m03",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m04",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m05",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m06",
+   "kind": "near_misses",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m07",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "m08",
+   "kind": "near_misses",
+   "outcome": "answered",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "w01",
+   "kind": "unanswerable",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "w02",
+   "kind": "unanswerable",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "w03",
+   "kind": "unanswerable",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  },
+  {
+   "id": "w04",
+   "kind": "unanswerable",
+   "outcome": "unknown",
+   "reason": null,
+   "escalated": false,
+   "passed": true,
+   "why": [],
+   "uncited": 0
+  }
+ ],
+ "turns": [
+  {
+   "case": "h01",
+   "message": "Is overnight delivery an option and what will it set me back?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 23.5,
+   "total_ms": 25.3,
+   "confidence": 0.6789,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h02",
+   "message": "Can I still edit the address if the box already left your warehouse?",
+   "reply": "The delivery address can be edited within 60 minutes of ordering from Account, then Orders [1]. After the parcel has shipped, we cannot redirect it, but you may be able to redirect it through the carrier's tracking page [1].",
+   "outcome": "answered",
+   "first_token_ms": 23.7,
+   "total_ms": 25.6,
+   "confidence": 0.8114,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h03",
+   "message": "Do you send things to APO addresses?",
+   "reply": "Standard shipping can be sent to PO boxes and to APO, FPO and DPO military addresses [1]. Express and overnight shipping are not available for these addresses [1].",
+   "outcome": "answered",
+   "first_token_ms": 16.5,
+   "total_ms": 20.6,
+   "confidence": 0.8413,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h04",
+   "message": "Part of my order showed up but not the rest, am I paying shipping twice?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 24.9,
+   "total_ms": 26.2,
+   "confidence": 0.7246,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h05",
+   "message": "How long is a gift message allowed to be?",
+   "reply": "You can add gift wrapping for $4.95 per item at checkout and include a free gift message of up to 200 characters [1]. Packing slips for gift orders do not show prices [1].",
+   "outcome": "answered",
+   "first_token_ms": 16.4,
+   "total_ms": 17.9,
+   "confidence": 0.7404,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h06",
+   "message": "When do you bill me for something that's backordered?",
+   "reply": "Backordered and pre-order items show an estimated ship date on the product page [1]. Your card is charged when the item ships, not when you order [1]. You can cancel a backordered item at any time before it ships [1].",
+   "outcome": "answered",
+   "first_token_ms": 37.8,
+   "total_ms": 39.8,
+   "confidence": 0.8346,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h07",
+   "message": "I'd like a bigger size, what's the quickest way to swap?",
+   "reply": "To exchange an item for a different size or colour, start a return and place a new order for the item you want [1]. This is the fastest way, because it does not wait for the return to arrive [1].",
+   "outcome": "answered",
+   "first_token_ms": 39.2,
+   "total_ms": 42.8,
+   "confidence": 0.8097,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h08",
+   "message": "My mum bought me a lamp as a present, can I send it back without her knowing?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 31.5,
+   "total_ms": 34.6,
+   "confidence": 0.6125,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h09",
+   "message": "What do you need from me to claim on the warranty?",
+   "reply": "To claim under warranty, send support your order number, a short description of the fault and a photo or video [1]. We reply within 3 business days with a repair, replacement part, or replacement item [1].",
+   "outcome": "answered",
+   "first_token_ms": 17.7,
+   "total_ms": 19.3,
+   "confidence": 0.9109,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h10",
+   "message": "Is it possible to spread the payments out?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 15.1,
+   "total_ms": 16.6,
+   "confidence": 0.7183,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h11",
+   "message": "Does my leftover credit ever run out?",
+   "reply": "Store credit is applied automatically at checkout [1]. It does not expire, cannot be exchanged for cash and cannot be transferred to another account [1].",
+   "outcome": "answered",
+   "first_token_ms": 14.7,
+   "total_ms": 16.3,
+   "confidence": 0.7745,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h12",
+   "message": "I need to use a different email on my profile",
+   "reply": "Go to Account, then Profile, and edit your email address [1]. We send a confirmation link to the new address, and the change takes effect only after you select it [1].",
+   "outcome": "answered",
+   "first_token_ms": 15.1,
+   "total_ms": 16.5,
+   "confidence": 0.838,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h13",
+   "message": "Can I check out without signing up?",
+   "reply": "You can order without an account [1]. Guest orders can be tracked with the link in the order email [1]. Creating an account later with the same email address adds earlier guest orders to your history [1].",
+   "outcome": "answered",
+   "first_token_ms": 13.5,
+   "total_ms": 15.0,
+   "confidence": 0.7927,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h14",
+   "message": "Stop sending me promotional mail please, how?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 13.8,
+   "total_ms": 14.9,
+   "confidence": 0.6356,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h15",
+   "message": "Can I freeze my Plus subscription for a couple of months?",
+   "reply": "Cancel any time under Account, then Membership, then Cancel [1]. Benefits continue until the end of the period you have paid for, and the membership does not renew [1].",
+   "outcome": "answered",
+   "first_token_ms": 17.5,
+   "total_ms": 19.0,
+   "confidence": 0.8049,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h16",
+   "message": "How high does the standing desk go?",
+   "reply": "The Rise standing desk supports up to 120 kg (265 lb) and adjusts from 72 cm to 120 cm in height [1]. The desktop measures 140 cm by 70 cm [1].",
+   "outcome": "answered",
+   "first_token_ms": 12.6,
+   "total_ms": 13.8,
+   "confidence": 0.916,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h17",
+   "message": "How many gadgets can the keyboard remember?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 13.2,
+   "total_ms": 14.3,
+   "confidence": 0.6779,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h18",
+   "message": "Will you take my old desk away?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 13.2,
+   "total_ms": 14.3,
+   "confidence": 0.7273,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h19",
+   "message": "We want to buy 15 monitor arms, is there a better price?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 16.2,
+   "total_ms": 17.3,
+   "confidence": 0.7272,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "h20",
+   "message": "Are you open on Sundays?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 11.7,
+   "total_ms": 12.6,
+   "confidence": 0.7234,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x01",
+   "message": "My bank statement shows two identical payments to you for one chair.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 17.4,
+   "total_ms": 18.3,
+   "confidence": 0.6623,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x02",
+   "message": "You've helped yourself to $60 that I never agreed to pay.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 18.9,
+   "total_ms": 20.4,
+   "confidence": 0.5562,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x03",
+   "message": "The amount you took is higher than what checkout showed me.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 26.6,
+   "total_ms": 27.8,
+   "confidence": 0.6567,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x04",
+   "message": "I returned the desk two months ago and haven't seen a penny back.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 20.7,
+   "total_ms": 23.5,
+   "confidence": 0.6241,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x05",
+   "message": "I'll be taking this to a tribunal.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 29.0,
+   "total_ms": 30.2,
+   "confidence": 0.5471,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x06",
+   "message": "Expect a letter from my legal representative.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 18.2,
+   "total_ms": 19.2,
+   "confidence": 0.6225,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x07",
+   "message": "I'm filing a claim against your company with the authorities.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 19.7,
+   "total_ms": 21.5,
+   "confidence": 0.6495,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x08",
+   "message": "Honestly the most pathetic service I've experienced. I've had it with you.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 36.0,
+   "total_ms": 38.6,
+   "confidence": 0.511,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x09",
+   "message": "What is wrong with you people? Nobody ever replies and I'm sick of it.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 27.6,
+   "total_ms": 28.9,
+   "confidence": 0.5727,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x10",
+   "message": "I'd rather deal with a human being about this.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 24.1,
+   "total_ms": 25.1,
+   "confidence": 0.5269,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x11",
+   "message": "There are orders on my profile that I never placed.",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 18.4,
+   "total_ms": 19.8,
+   "confidence": 0.7261,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "x12",
+   "message": "The desk motor gave off a burning smell and my hand got a shock.",
+   "reply": "Your safety comes first: if anyone is in danger, contact your local emergency services. I'm handing this to a person. Your ticket is FWT-1001. The agent gets this conversation and a summary, so you won't need to repeat yourself.",
+   "outcome": "escalated",
+   "first_token_ms": 0.8,
+   "total_ms": 6.9,
+   "confidence": null,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "summary",
+     "model": "template",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "safety",
+    "sentiment": "neutral",
+    "urgency": "high",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m01",
+   "message": "If the price goes down next week, do I get money back?",
+   "reply": "If the price of an item drops within 14 days of your purchase, contact support and we refund the difference as store credit [1]. Price adjustments do not apply to clearance, lightning deals or other retailers' prices [1].",
+   "outcome": "answered",
+   "first_token_ms": 21.4,
+   "total_ms": 22.8,
+   "confidence": 0.7769,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m02",
+   "message": "How long before a pending authorisation disappears?",
+   "reply": "Your card is authorised when you place the order and charged when the order ships [1]. A pending authorisation is not a charge and drops off your statement within 3 to 7 business days if the order is cancelled [1].",
+   "outcome": "answered",
+   "first_token_ms": 13.2,
+   "total_ms": 14.6,
+   "confidence": 0.8856,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m03",
+   "message": "What happens to my refund if I paid with a gift card?",
+   "reply": "Enter the 16 digit gift card code at checkout [1]. Gift cards never expire and have no fees [1]. You can use up to 3 gift cards on one order [1].",
+   "outcome": "answered",
+   "first_token_ms": 18.3,
+   "total_ms": 20.0,
+   "confidence": 0.844,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m04",
+   "message": "Do you have a policy for lost parcels?",
+   "reply": "If tracking shows no movement for 3 business days, or your parcel is more than 3 business days past the estimated date, contact support and we will open a carrier trace [1]. A trace takes up to 5 business days [1]. If the carrier confirms the parcel is lost, we send a replacement or refund the order [1].",
+   "outcome": "answered",
+   "first_token_ms": 15.2,
+   "total_ms": 16.6,
+   "confidence": 0.7723,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m05",
+   "message": "Is the annual fee charged automatically after the trial?",
+   "reply": "New members get a 30 day free trial [1]. We email a reminder 3 days before the trial ends [1]. If you do not cancel before it ends, the membership starts and your default card is charged [1].",
+   "outcome": "answered",
+   "first_token_ms": 11.1,
+   "total_ms": 12.3,
+   "confidence": 0.7776,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m06",
+   "message": "Can I delete a saved card from my account?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 19.7,
+   "total_ms": 20.8,
+   "confidence": 0.7379,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m07",
+   "message": "What should I do if I get an email asking for my password?",
+   "reply": "Select Forgot password on the sign-in page and enter your email address [1]. The reset link is valid for 30 minutes [1]. If no email arrives, check your spam folder and make sure you used the address on the account [1].",
+   "outcome": "answered",
+   "first_token_ms": 22.5,
+   "total_ms": 25.7,
+   "confidence": 0.8447,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "m08",
+   "message": "The headset firmware update keeps failing, bit frustrating. Any tips?",
+   "reply": "Update Murmur headset firmware with the Murmur app on Windows or macOS [1]. Connect the headset with its USB cable, keep it plugged in, and expect the update to take about 5 minutes [1].",
+   "outcome": "answered",
+   "first_token_ms": 20.6,
+   "total_ms": 21.6,
+   "confidence": 0.8453,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    },
+    {
+     "role": "answer",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "w01",
+   "message": "Do you sell monitors?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 11.1,
+   "total_ms": 12.6,
+   "confidence": 0.6343,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "w02",
+   "message": "Can I get next-hour delivery by courier in Chicago?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 16.1,
+   "total_ms": 17.2,
+   "confidence": 0.6941,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "w03",
+   "message": "What materials is the keyboard made from?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 16.1,
+   "total_ms": 17.2,
+   "confidence": 0.6762,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  },
+  {
+   "case": "w04",
+   "message": "Do you have an affiliate programme?",
+   "reply": "I don't know the answer to that from our help center, so I won't guess. Would you like me to pass this to a human support agent?",
+   "outcome": "unknown",
+   "first_token_ms": 13.1,
+   "total_ms": 14.1,
+   "confidence": 0.6285,
+   "model_called": false,
+   "cost_usd": 0.0,
+   "usage": [
+    {
+     "role": "triage",
+     "model": "rule-based",
+     "input_tokens": 0,
+     "output_tokens": 0,
+     "latency_ms": 0.0,
+     "first_token_ms": 0.0,
+     "cost_usd": 0.0,
+     "cached": false
+    }
+   ],
+   "dropped": [],
+   "triage": {
+    "intent": "question",
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "source": "rule-based"
+   },
+   "notes": []
+  }
+ ],
+ "suite": "holdout",
+ "engine": "rules",
+ "via": "in-process"
+}
