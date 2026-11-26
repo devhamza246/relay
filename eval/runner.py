@@ -102,7 +102,12 @@ def latency(results: list[dict]) -> dict:
             "first_token_over_2s": sum(v >= 2000 for v in first), "total_over_6s": sum(v >= 6000 for v in total)}
 
 
-def run_all(driver, pause_s: float = 0.0) -> dict:
+def load_holdout() -> tuple[list[dict], dict[str, list[dict]]]:
+    data = yaml.safe_load((HERE / "holdout.yaml").read_text(encoding="utf-8"))
+    return data["tickets"], data["safety"]
+
+
+def run_all(driver, pause_s: float = 0.0, suite: str = "main") -> dict:
     tickets, safety, turns = [], [], []
 
     def talk(case: dict) -> list[dict]:
@@ -117,9 +122,10 @@ def run_all(driver, pause_s: float = 0.0) -> dict:
             time.sleep(pause_s)
         return results
 
-    for case in load_tickets():
+    ticket_cases, safety_cases = load_holdout() if suite == "holdout" else (load_tickets(), load_safety())
+    for case in ticket_cases:
         tickets.append(score_ticket(case, talk(case)))
-    for kind, cases in load_safety().items():
+    for kind, cases in safety_cases.items():
         for case in cases:
             safety.append(score_safety(kind, case, talk(case)))
     return {"summary": summarise(tickets, safety, turns), "tickets": tickets, "safety": safety, "turns": turns}
@@ -157,10 +163,12 @@ def main() -> int:
     ap.add_argument("--engine", default="rules")
     ap.add_argument("--url", default="")
     ap.add_argument("--out", default="")
+    ap.add_argument("--suite", choices=("main", "holdout"), default="main")
     ap.add_argument("--pause", type=float, default=0.0)
     args = ap.parse_args()
     driver = Http(args.url, args.engine) if args.url else InProcess(args.engine)
-    report = run_all(driver, args.pause)
+    report = run_all(driver, args.pause, args.suite)
+    report["suite"] = args.suite
     report["engine"], report["via"] = args.engine, "http" if args.url else "in-process"
     print(json.dumps(report["summary"], indent=2))
     for row in report["tickets"] + report["safety"]:

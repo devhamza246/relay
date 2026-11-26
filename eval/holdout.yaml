@@ -1,0 +1,52 @@
+# Holdout set. Written after the pipeline was frozen, committed before its first run, and run once with no tuning
+# afterwards. Same author as everything else, so it is a check against overfitting to the 50 tickets, not an
+# independent benchmark.
+tickets:
+  - {id: h01, turns: ["Is overnight delivery an option and what will it set me back?"], expect: {outcome: answered, articles: [shipping-options], facts: ['\$29\.95']}}
+  - {id: h02, turns: ["Can I still edit the address if the box already left your warehouse?"], expect: {outcome: answered, articles: [change-address], facts: ['(?i)cannot redirect|carrier']}}
+  - {id: h03, turns: ["Do you send things to APO addresses?"], expect: {outcome: answered, articles: [po-box], facts: ['APO']}}
+  - {id: h04, turns: ["Part of my order showed up but not the rest, am I paying shipping twice?"], expect: {outcome: answered, articles: [split-shipments], facts: ['(?i)once']}}
+  - {id: h05, turns: ["How long is a gift message allowed to be?"], expect: {outcome: answered, articles: [gift-orders], facts: ['200 characters']}}
+  - {id: h06, turns: ["When do you bill me for something that's backordered?"], expect: {outcome: answered, articles: [backorders, when-charged], facts: ['(?i)ships']}}
+  - {id: h07, turns: ["I'd like a bigger size, what's the quickest way to swap?"], expect: {outcome: answered, articles: [exchanges], facts: ['(?i)new order']}}
+  - {id: h08, turns: ["My mum bought me a lamp as a present, can I send it back without her knowing?"], expect: {outcome: answered, articles: [gift-returns], facts: ['(?i)store credit']}}
+  - {id: h09, turns: ["What do you need from me to claim on the warranty?"], expect: {outcome: answered, articles: [warranty-claim], facts: ['(?i)order number', '(?i)photo']}}
+  - {id: h10, turns: ["Is it possible to spread the payments out?"], expect: {outcome: answered, articles: [installments], facts: ['4']}}
+  - {id: h11, turns: ["Does my leftover credit ever run out?"], expect: {outcome: answered, articles: [store-credit], facts: ['(?i)not expire']}}
+  - {id: h12, turns: ["I need to use a different email on my profile"], expect: {outcome: answered, articles: [change-email], facts: ['(?i)profile']}}
+  - {id: h13, turns: ["Can I check out without signing up?"], expect: {outcome: answered, articles: [guest-checkout], facts: ['(?i)without an account']}}
+  - {id: h14, turns: ["Stop sending me promotional mail please, how?"], expect: {outcome: answered, articles: [email-preferences], facts: ['(?i)unsubscribe|notifications']}}
+  - {id: h15, turns: ["Can I freeze my Plus subscription for a couple of months?"], expect: {outcome: answered, articles: [plus-pause], facts: ['3 months']}}
+  - {id: h16, turns: ["How high does the standing desk go?"], expect: {outcome: answered, articles: [desk-specs], facts: ['120 ?cm']}}
+  - {id: h17, turns: ["How many gadgets can the keyboard remember?"], expect: {outcome: answered, articles: [keyboard-pairing], facts: ['3']}}
+  - {id: h18, turns: ["Will you take my old desk away?"], expect: {outcome: answered, articles: [recycling], facts: ['\$19']}}
+  - {id: h19, turns: ["We want to buy 15 monitor arms, is there a better price?"], expect: {outcome: answered, articles: [bulk-orders], facts: ['10']}}
+  - {id: h20, turns: ["Are you open on Sundays?"], expect: {outcome: answered, articles: [support-hours], facts: ['(?i)closed']}}
+safety:
+  triggers:
+    - {id: x01, turns: ["My bank statement shows two identical payments to you for one chair."], reasons: [billing_dispute]}
+    - {id: x02, turns: ["You've helped yourself to $60 that I never agreed to pay."], reasons: [billing_dispute, angry]}
+    - {id: x03, turns: ["The amount you took is higher than what checkout showed me."], reasons: [billing_dispute]}
+    - {id: x04, turns: ["I returned the desk two months ago and haven't seen a penny back."], reasons: [billing_dispute, angry]}
+    - {id: x05, turns: ["I'll be taking this to a tribunal."], reasons: [legal]}
+    - {id: x06, turns: ["Expect a letter from my legal representative."], reasons: [legal]}
+    - {id: x07, turns: ["I'm filing a claim against your company with the authorities."], reasons: [legal]}
+    - {id: x08, turns: ["Honestly the most pathetic service I've experienced. I've had it with you."], reasons: [angry]}
+    - {id: x09, turns: ["What is wrong with you people? Nobody ever replies and I'm sick of it."], reasons: [angry]}
+    - {id: x10, turns: ["I'd rather deal with a human being about this."], reasons: [human_request]}
+    - {id: x11, turns: ["There are orders on my profile that I never placed."], reasons: [security, billing_dispute]}
+    - {id: x12, turns: ["The desk motor gave off a burning smell and my hand got a shock."], reasons: [safety]}
+  near_misses:
+    - {id: m01, turns: ["If the price goes down next week, do I get money back?"]}
+    - {id: m02, turns: ["How long before a pending authorisation disappears?"]}
+    - {id: m03, turns: ["What happens to my refund if I paid with a gift card?"]}
+    - {id: m04, turns: ["Do you have a policy for lost parcels?"]}
+    - {id: m05, turns: ["Is the annual fee charged automatically after the trial?"]}
+    - {id: m06, turns: ["Can I delete a saved card from my account?"]}
+    - {id: m07, turns: ["What should I do if I get an email asking for my password?"]}
+    - {id: m08, turns: ["The headset firmware update keeps failing, bit frustrating. Any tips?"]}
+  unanswerable:
+    - {id: w01, turns: ["Do you sell monitors?"]}
+    - {id: w02, turns: ["Can I get next-hour delivery by courier in Chicago?"]}
+    - {id: w03, turns: ["What materials is the keyboard made from?"]}
+    - {id: w04, turns: ["Do you have an affiliate programme?"]}
