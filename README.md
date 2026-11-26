@@ -169,6 +169,17 @@ triage falls back to the keyword rules (1 of 12 on the holdout). The spend cap i
 call, so an API restart resets it and simultaneous requests can overshoot it slightly; visitor counts are in Redis. The
 score and latency tables above come from the benchmark runs, not from public traffic.
 
+**Bring your own key.** A visitor can paste their own Anthropic key into the page. It is sent with each message in the
+`X-Anthropic-Key` header (it must start with `sk-ant-` and be 20 to 300 characters, otherwise the API answers 400), used
+for that message's model calls only, and bypasses both limits. The browser holds it in page memory, not in storage, and the
+server does not store, log, cache or record it; replies made with it are never written to a cassette. A key typed into the
+chat itself is masked. A key that fails gets a plain message and does not count as a failed answer. It does pass through
+this server and its Cloudflare tunnel, so use a separate key with a low spend limit and delete it afterwards. Tested with a
+fake client against the database, session state, logs and cassette, and once on the deployment with a real key and the cap
+at zero: the key was not found in Postgres, Redis, container logs or the cassette.
+
+The page opens with a short "What is this?" guide covering how to trigger and inspect a handoff.
+
 The compose default is `replay`, which needs no key and cannot spend. Replaying the cassette reproduces the benchmark
 run's scores exactly, and CI gates on this. The demo shows the retention period, uses fictional identities and asks
 visitors not to enter personal data.
